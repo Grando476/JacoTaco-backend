@@ -34,6 +34,6 @@ SELECT id, 'Lesson 2A.2: Equations', 'https://example.com/vid4', '# Topic 2A.2\n
 -- Geometry
 SELECT id, 'Lesson 2G.1: Shapes', 'https://example.com/vid5', '# Topic 2G.1\nTriangles.' FROM n2_geo UNION ALL
 SELECT id, 'Lesson 2G.2: Angles', 'https://example.com/vid6', '# Topic 2G.2\nAngles.' FROM n2_geo UNION ALL
--- Expert (Has multiple paths leading to it)
+-- Expert (multiple paths leading to it)
 SELECT id, 'Lesson 3.1: Synthesis', 'https://example.com/vid7', '# Topic 3.1\nCombining.' FROM n3 UNION ALL
 SELECT id, 'Lesson 3.2: Final Exam', 'https://example.com/vid8', '# Topic 3.2\nExam.' FROM n3;

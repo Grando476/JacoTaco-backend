@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS public.lessons CASCADE;
+DROP TABLE IF EXISTS public.node_edges CASCADE;
+DROP TABLE IF EXISTS public.nodes CASCADE;
