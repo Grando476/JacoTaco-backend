@@ -1,17 +1,23 @@
 -- Database schema for 'EduMath' on Supabase (PostgreSQL)
 
--- Skill Tree
+-- Skill Tree Nodes
 CREATE TABLE IF NOT EXISTS public.nodes (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    parent_id UUID REFERENCES public.nodes(id) ON DELETE SET NULL, -- Self-referencing dla drzewka
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Index for parent_id to speed up loading the tree
-CREATE INDEX IF NOT EXISTS idx_nodes_parent_id ON public.nodes(parent_id);
+-- Edge routing for DAG (Many to Many relationship replacing parent_id)
+CREATE TABLE IF NOT EXISTS public.node_edges (
+    parent_id UUID NOT NULL REFERENCES public.nodes(id) ON DELETE CASCADE,
+    child_id UUID NOT NULL REFERENCES public.nodes(id) ON DELETE CASCADE,
+    PRIMARY KEY (parent_id, child_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_node_edges_parent ON public.node_edges(parent_id);
+CREATE INDEX IF NOT EXISTS idx_node_edges_child ON public.node_edges(child_id);
 
 -- Table for Lessons assigned to Nodes
 CREATE TABLE IF NOT EXISTS public.lessons (
