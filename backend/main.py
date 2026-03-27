@@ -56,3 +56,21 @@ async def get_nodes():
         return {"nodes": nodes, "edges": edges}
     except Exception as e:
         return {"error": str(e)}
+
+@app.get("/api/v1/nodes/{node_id}/lessons")
+async def get_node_lessons(node_id: str):
+    """
+    Pulls all lessons associated with a specific node.
+    """
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("SELECT id, title, video_url, content_markdown FROM public.lessons WHERE node_id = %s ORDER BY created_at ASC;", (node_id,))
+        lessons = cur.fetchall()
+        
+        cur.close()
+        conn.close()
+        return {"lessons": lessons}
+    except Exception as e:
+        return {"error": str(e)}

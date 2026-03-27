@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS public.nodes (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Edge routing for DAG (Many to Many relationship replacing parent_id)
+-- Edge routing for DAG (Many to Many relationship)
 CREATE TABLE IF NOT EXISTS public.node_edges (
     parent_id UUID NOT NULL REFERENCES public.nodes(id) ON DELETE CASCADE,
     child_id UUID NOT NULL REFERENCES public.nodes(id) ON DELETE CASCADE,
@@ -34,4 +34,4 @@ CREATE TABLE IF NOT EXISTS public.lessons (
 CREATE INDEX IF NOT EXISTS idx_lessons_node_id ON public.lessons(node_id);
 
 -- Optional (Future: Table for authorized users and progress - EduMath App)
--- CREATE TABLE IF NOT EXISTS public.user_progress ( ... );
+-- CREATE TABLE IF NOT EXISTS public.user_progress
