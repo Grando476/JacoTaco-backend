@@ -1,39 +1,68 @@
--- Insert Nodes
-WITH inserted_nodes AS (
-    INSERT INTO public.nodes (name, description) VALUES 
-    ('Level 1: Basics', 'Introduction to the subject and basic concepts'),
-    ('Level 2: Algebra', 'Expansion of knowledge and algebra methods'),
-    ('Level 2: Geometry', 'Shapes, formulas, and visual logic'),
-    ('Level 3: Expert', 'Difficult topics combining everything')
+-- Dodanie Działu i Tematów z linkami URL
+WITH ins_chapter AS (
+    INSERT INTO public.chapters (name) VALUES ('Potęgi i pierwiastki') RETURNING id
+),
+ins_topics AS (
+    INSERT INTO public.topics (chapter_id, name, video_url)
+    SELECT id, 'Potęgi o wykładniku całkowitym', 'https://example.com/wideo/potegi-calkowite' FROM ins_chapter UNION ALL
+    SELECT id, 'Pierwiastki', 'https://example.com/wideo/pierwiastki' FROM ins_chapter UNION ALL
+    SELECT id, 'Potęgi o wykładniku nie-całkowitym', 'https://example.com/wideo/potegi-niecalkowite' FROM ins_chapter
     RETURNING id, name
 ),
-n1 AS (SELECT id FROM inserted_nodes WHERE name = 'Level 1: Basics'),
-n2_alg AS (SELECT id FROM inserted_nodes WHERE name = 'Level 2: Algebra'),
-n2_geo AS (SELECT id FROM inserted_nodes WHERE name = 'Level 2: Geometry'),
-n3 AS (SELECT id FROM inserted_nodes WHERE name = 'Level 3: Expert'),
 
--- Insert Edges
-edges_ins AS (
-    INSERT INTO public.node_edges (parent_id, child_id)
-    -- Level 1 splits into two branches
-    SELECT n1.id, n2_alg.id FROM n1, n2_alg UNION ALL
-    SELECT n1.id, n2_geo.id FROM n1, n2_geo UNION ALL
-    -- Both branches merge into Level 3 (DAG feature showcasing multiple parents)
-    SELECT n2_alg.id, n3.id FROM n2_alg, n3 UNION ALL
-    SELECT n2_geo.id, n3.id FROM n2_geo, n3
+-- Routing ułożony linearnie (Potęgi Całkowite -> Pierwiastki -> Potęgi Nie-całkowite)
+ins_edges AS (
+    INSERT INTO public.topic_edges (parent_id, child_id)
+    SELECT t1.id, t2.id FROM ins_topics t1, ins_topics t2 WHERE t1.name = 'Potęgi o wykładniku całkowitym' AND t2.name = 'Pierwiastki'
+    UNION ALL
+    SELECT t2.id, t3.id FROM ins_topics t2, ins_topics t3 WHERE t2.name = 'Pierwiastki' AND t3.name = 'Potęgi o wykładniku nie-całkowitym'
+),
+
+-- Dodanie wszystkich Subtematów
+ins_subtopics AS (
+    INSERT INTO public.subtopics (topic_id, name, importance)
+    -- Potęgi całkowite
+    SELECT t.id, 'Definicja potęgi o wykładniku naturalnym', 5 FROM ins_topics t WHERE t.name = 'Potęgi o wykładniku całkowitym' UNION ALL
+    SELECT t.id, 'Wzory na Potęgach, mnożenie, dzielenie, potęgowanie, wykładnik ujemny', 5 FROM ins_topics t WHERE t.name = 'Potęgi o wykładniku całkowitym' UNION ALL
+    SELECT t.id, 'Notacja wykładnicza', 2 FROM ins_topics t WHERE t.name = 'Potęgi o wykładniku całkowitym' UNION ALL
+    SELECT t.id, 'Lokaty', 3 FROM ins_topics t WHERE t.name = 'Potęgi o wykładniku całkowitym' UNION ALL
+    
+    -- Pierwiastki
+    SELECT t.id, 'Pierwiastki stopnia parzystego', 5 FROM ins_topics t WHERE t.name = 'Pierwiastki' UNION ALL
+    SELECT t.id, 'Pierwiastki stopnia nieparzystego', 5 FROM ins_topics t WHERE t.name = 'Pierwiastki' UNION ALL
+    SELECT t.id, 'Wzory na pierwiastkach, mnożenie, dzielenie, potęgowanie', 5 FROM ins_topics t WHERE t.name = 'Pierwiastki' UNION ALL
+    SELECT t.id, 'Wyciąganie niewymierności', 3 FROM ins_topics t WHERE t.name = 'Pierwiastki' UNION ALL
+    
+    -- Potęgi niecałkowite
+    SELECT t.id, 'Zamiana Pierwiastków na potęgi', 3 FROM ins_topics t WHERE t.name = 'Potęgi o wykładniku nie-całkowitym' UNION ALL
+    SELECT t.id, 'Potęgi o wykładniku wymiernym', 3 FROM ins_topics t WHERE t.name = 'Potęgi o wykładniku nie-całkowitym' UNION ALL
+    SELECT t.id, 'Potęgi o wykładniku rzeczywistym', 3 FROM ins_topics t WHERE t.name = 'Potęgi o wykładniku nie-całkowitym'
+    RETURNING id, name
+),
+
+-- Grupy zadań dla wypełnionego subtematu
+ins_task_groups AS (
+    INSERT INTO public.task_groups (subtopic_id, name)
+    SELECT s.id, 'Liczenie potęg o podstawie całkowitej i zerowej' FROM ins_subtopics s WHERE s.name = 'Definicja potęgi o wykładniku naturalnym' UNION ALL
+    SELECT s.id, 'Liczenie potęg o podstawie wymiernej' FROM ins_subtopics s WHERE s.name = 'Definicja potęgi o wykładniku naturalnym' UNION ALL
+    SELECT s.id, 'Liczenie potęg o podstawie ujemnej i wymiernej' FROM ins_subtopics s WHERE s.name = 'Definicja potęgi o wykładniku naturalnym'
+    RETURNING id, name
 )
 
--- Insert Lessons
-INSERT INTO public.lessons (node_id, title, video_url, content_markdown)
--- Basics
-SELECT id, 'Lesson 1.1: Intro', 'https://example.com/vid1', '# Topic 1.1\nStarting.' FROM n1 UNION ALL
-SELECT id, 'Lesson 1.2: Numbers', 'https://example.com/vid2', '# Topic 1.2\nNumber types.' FROM n1 UNION ALL
--- Algebra
-SELECT id, 'Lesson 2A.1: Variables', 'https://example.com/vid3', '# Topic 2A.1\nVariables.' FROM n2_alg UNION ALL
-SELECT id, 'Lesson 2A.2: Equations', 'https://example.com/vid4', '# Topic 2A.2\n$x = 2$.' FROM n2_alg UNION ALL
--- Geometry
-SELECT id, 'Lesson 2G.1: Shapes', 'https://example.com/vid5', '# Topic 2G.1\nTriangles.' FROM n2_geo UNION ALL
-SELECT id, 'Lesson 2G.2: Angles', 'https://example.com/vid6', '# Topic 2G.2\nAngles.' FROM n2_geo UNION ALL
--- Expert (multiple paths leading to it)
-SELECT id, 'Lesson 3.1: Synthesis', 'https://example.com/vid7', '# Topic 3.1\nCombining.' FROM n3 UNION ALL
-SELECT id, 'Lesson 3.2: Final Exam', 'https://example.com/vid8', '# Topic 3.2\nExam.' FROM n3;
+-- Zadania wraz z przykładowymi linkami wideo do poszczególnych zadań
+INSERT INTO public.tasks (task_group_id, content, correct_answer, video_url)
+SELECT tg.id, 'Oblicz: $$ 2^5 $$', '32', 'https://example.com/zadanie/vid1' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie całkowitej i zerowej' UNION ALL
+SELECT tg.id, 'Oblicz: $$ (-3)^4 $$', '81', 'https://example.com/zadanie/vid2' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie całkowitej i zerowej' UNION ALL
+SELECT tg.id, 'Oblicz: $$ 7^0 $$', '1', 'https://example.com/zadanie/vid3' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie całkowitej i zerowej' UNION ALL
+SELECT tg.id, 'Oblicz: $$ 0^6 $$', '0', 'https://example.com/zadanie/vid4' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie całkowitej i zerowej' UNION ALL
+SELECT tg.id, 'Oblicz: $$ (-5)^3 $$', '-125', 'https://example.com/zadanie/vid5' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie całkowitej i zerowej' UNION ALL
+
+SELECT tg.id, 'Oblicz: $$ \left(\frac{2}{3}\right)^3 $$', '\frac{8}{27}', 'https://example.com/zadanie/vid6' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie wymiernej' UNION ALL
+SELECT tg.id, 'Oblicz: $$ 0.2^2 $$', '0.04', 'https://example.com/zadanie/vid7' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie wymiernej' UNION ALL
+SELECT tg.id, 'Oblicz: $$ \left(1\frac{1}{2}\right)^2 $$', '\frac{9}{4}', 'https://example.com/zadanie/vid8' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie wymiernej' UNION ALL
+SELECT tg.id, 'Oblicz: $$ \left(\frac{1}{10}\right)^5 $$', '0.00001', 'https://example.com/zadanie/vid9' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie wymiernej' UNION ALL
+
+SELECT tg.id, 'Oblicz: $$ \left(-\frac{1}{2}\right)^4 $$', '\frac{1}{16}', 'https://example.com/zadanie/vid10' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie ujemnej i wymiernej' UNION ALL
+SELECT tg.id, 'Oblicz: $$ (-0.5)^3 $$', '-0.125', 'https://example.com/zadanie/vid11' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie ujemnej i wymiernej' UNION ALL
+SELECT tg.id, 'Oblicz: $$ \left(-1\frac{1}{3}\right)^3 $$', '-\frac{64}{27}', 'https://example.com/zadanie/vid12' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie ujemnej i wymiernej' UNION ALL
+SELECT tg.id, 'Oblicz: $$ \left(-\frac{3}{4}\right)^2 $$', '\frac{9}{16}', 'https://example.com/zadanie/vid13' FROM ins_task_groups tg WHERE tg.name = 'Liczenie potęg o podstawie ujemnej i wymiernej';

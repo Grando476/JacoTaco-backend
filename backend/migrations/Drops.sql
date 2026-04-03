@@ -1,3 +1,10 @@
 DROP TABLE IF EXISTS public.lessons CASCADE;
 DROP TABLE IF EXISTS public.node_edges CASCADE;
 DROP TABLE IF EXISTS public.nodes CASCADE;
+
+DROP TABLE IF EXISTS public.tasks CASCADE;
+DROP TABLE IF EXISTS public.task_groups CASCADE;
+DROP TABLE IF EXISTS public.subtopics CASCADE;
+DROP TABLE IF EXISTS public.topic_edges CASCADE;
+DROP TABLE IF EXISTS public.topics CASCADE;
+DROP TABLE IF EXISTS public.chapters CASCADE;
