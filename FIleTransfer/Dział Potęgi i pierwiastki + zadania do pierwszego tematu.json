@@ -1,0 +1,259 @@
+{
+  "dzial": "Potęgi i pierwiastki",
+  "tematy": [
+    {
+      "nazwa": "Potęgi o wykładniku całkowitym",
+      "subtematy": [
+        {
+          "nazwa": "Definicja potęgi o wykładniku naturalnym",
+          "waznosc": 5,
+          "waznosc_opis": "Bardzo ważne!",
+          "kolor": "Czerwony",
+          "zadania": {
+            "Liczenie potęg o podstawie całkowitej i zerowej": [
+              { "id": "1", "content": "Oblicz: $$ 2^5 $$", "correct_answer": "32" },
+              { "id": "2", "content": "Oblicz: $$ (-3)^4 $$", "correct_answer": "81" },
+              { "id": "3", "content": "Oblicz: $$ 7^0 $$", "correct_answer": "1" },
+              { "id": "4", "content": "Oblicz: $$ 0^6 $$", "correct_answer": "0" },
+              { "id": "5", "content": "Oblicz: $$ (-5)^3 $$", "correct_answer": "-125" }
+            ],
+            "Liczenie potęg o podstawie wymiernej": [
+              { "id": "6", "content": "Oblicz: $$ \\left(\\frac{2}{3}\\right)^3 $$", "correct_answer": "\\frac{8}{27}" },
+              { "id": "7", "content": "Oblicz: $$ 0.2^2 $$", "correct_answer": "0.04" },
+              { "id": "8", "content": "Oblicz: $$ \\left(1\\frac{1}{2}\\right)^2 $$", "correct_answer": "\\frac{9}{4}" },
+              { "id": "9", "content": "Oblicz: $$ \\left(\\frac{1}{10}\\right)^5 $$", "correct_answer": "0.00001" }
+            ],
+            "Liczenie potęg o podstawie ujemnej i wymiernej": [
+              { "id": "10", "content": "Oblicz: $$ \\left(-\\frac{1}{2}\\right)^4 $$", "correct_answer": "\\frac{1}{16}" },
+              { "id": "11", "content": "Oblicz: $$ (-0.5)^3 $$", "correct_answer": "-0.125" },
+              { "id": "12", "content": "Oblicz: $$ \\left(-1\\frac{1}{3}\\right)^3 $$", "correct_answer": "-\\frac{64}{27}" },
+              { "id": "13", "content": "Oblicz: $$ \\left(-\\frac{3}{4}\\right)^2 $$", "correct_answer": "\\frac{9}{16}" }
+            ]
+          }
+        },
+        {
+          "nazwa": "Wzory na Potęgach, mnożenie, dzielenie, potęgowanie, wykładnik ujemny",
+          "waznosc": 5,
+          "waznosc_opis": "Bardzo ważne!",
+          "kolor": "Czerwony",
+          "zadania": {
+            "Mnożenie/Dzielenie potęg o tych samych podstawach": [
+              { "id": "m1", "content": "Oblicz: $$ 3^2 \\cdot 3^4 $$", "correct_answer": "3^6" },
+              { "id": "m2", "content": "Zapisz w postaci jednej potęgi: $$ 5^7 : 5^3 $$", "correct_answer": "5^4" },
+              { "id": "m3", "content": "Oblicz: $$ (-2)^3 \\cdot (-2)^2 $$", "correct_answer": "-32" },
+              { "id": "m4", "content": "Zapisz w postaci jednej potęgi: $$ \\frac{7^8}{7^5} $$", "correct_answer": "7^3" },
+              { "id": "m5", "content": "Uprość wyrażenie: $$ a^5 \\cdot a \\cdot a^2 $$", "correct_answer": "a^8" },
+              { "id": "m6", "content": "Oblicz: $$ \\frac{10^9 \\cdot 10^3}{10^{10}} $$", "correct_answer": "100" }
+            ],
+            "Wychodzenie z nawiasu do potęgi w którym był iloczyn/iloraz": [
+              { "id": "n1", "content": "Zapisz bez nawiasów: $$ (2 \\cdot 5)^3 $$", "correct_answer": "2^3 \\cdot 5^3" },
+              { "id": "n2", "content": "Oblicz: $$ (3 \\cdot 10)^2 $$", "correct_answer": "900" },
+              { "id": "n3", "content": "Zapisz w postaci potęgi iloczynu: $$ 4^5 \\cdot 3^5 $$", "correct_answer": "12^5" },
+              { "id": "n4", "content": "Zapisz bez nawiasów: $$ \\left(\\frac{x}{y}\\right)^4 $$", "correct_answer": "\\frac{x^4}{y^4}" },
+              { "id": "n5", "content": "Oblicz: $$ \\left(\\frac{2}{3}\\right)^3 \\cdot 1.5^3 $$", "correct_answer": "1" },
+              { "id": "n6", "content": "Uprość: $$ (2ab)^4 $$", "correct_answer": "16a^4b^4" }
+            ],
+            "Obliczanie Potęgi podniesionej do potęgi": [
+              { "id": "p1", "content": "Zapisz w postaci jednej potęgi: $$ (2^3)^2 $$", "correct_answer": "2^6" },
+              { "id": "p2", "content": "Uprość: $$ ((5^2)^4)^3 $$", "correct_answer": "5^{24}" },
+              { "id": "p3", "content": "Czy wyrażenia $$ (3^2)^3 $$ oraz $$ 3^{2^3} $$ są równe?", "correct_answer": "Nie" },
+              { "id": "p4", "content": "Zapisz w postaci jednej potęgi: $$ ((-4)^3)^5 $$", "correct_answer": "(-4)^{15}" },
+              { "id": "p5", "content": "Oblicz wartość: $$ (10^2)^3 $$", "correct_answer": "1000000" },
+              { "id": "p6", "content": "Uprość: $$ (x^n)^3 $$", "correct_answer": "x^{3n}" }
+            ],
+            "Sprowadzanie liczb do wspólnej podstawy potęgi": [
+              { "id": "s1", "content": "Zapisz liczbę 8 w postaci potęgi o podstawie 2.", "correct_answer": "2^3" },
+              { "id": "s2", "content": "Zapisz jako potęgę o podstawie 3: $$ 9 \\cdot 27 $$", "correct_answer": "3^5" },
+              { "id": "s3", "content": "Uprość: $$ 2^5 \\cdot 4^2 $$", "correct_answer": "2^9" },
+              { "id": "s4", "content": "Zapisz w postaci jednej potęgi: $$ 25^3 : 5^4 $$", "correct_answer": "5^2" },
+              { "id": "s5", "content": "Uprość wyrażenie: $$ \\frac{27^2}{3^5} $$", "correct_answer": "3" },
+              { "id": "s6", "content": "Zapisz jako potęgę o podstawie 2: $$ \\frac{16^2 \\cdot 4^3}{8^4} $$", "correct_answer": "2^2" }
+            ],
+            "obliczanie potęg z liczb ujemnych i obliczanie ujemnych potęg": [
+              { "id": "u1", "content": "Oblicz: $$ 5^{-1} $$", "correct_answer": "\\frac{1}{5}" },
+              { "id": "u2", "content": "Oblicz: $$ (-2)^{-3} $$", "correct_answer": "-\\frac{1}{8}" },
+              { "id": "u3", "content": "Oblicz: $$ \\left(\\frac{1}{3}\\right)^{-2} $$", "correct_answer": "9" },
+              { "id": "u4", "content": "Zapisz bez ujemnego wykładnika: $$ x^{-5} $$", "correct_answer": "\\frac{1}{x^5}" },
+              { "id": "u5", "content": "Oblicz: $$ \\left(\\frac{2}{5}\\right)^{-3} $$", "correct_answer": "15.625" },
+              { "id": "u6", "content": "Oblicz: $$ (-0.1)^{-4} $$", "correct_answer": "10000" }
+            ],
+            "Zadania złożone z powyższych elementów": [
+              { "id": "z1", "content": "Oblicz: $$ \\frac{2^5 \\cdot 2^{-3}}{2^2} $$", "correct_answer": "1" },
+              { "id": "z2", "content": "Uprość: $$ \\frac{(x^2)^3 \\cdot x^4}{x^{10}} $$", "correct_answer": "1" },
+              { "id": "z3", "content": "Oblicz: $$ \\frac{3^4 \\cdot 9^{-1}}{27} $$", "correct_answer": "\\frac{1}{3}" },
+              { "id": "z4", "content": "Zapisz w najprostszej postaci: $$ \\frac{5^{-2} \\cdot 25^2}{(5^2)^3} $$", "correct_answer": "5^{-4}" },
+              { "id": "z5", "content": "Oblicz: $$ \\frac{2^6 \\cdot 5^6}{10^4} $$", "correct_answer": "100" },
+              { "id": "z6", "content": "Uprość: $$ \\left(\\frac{a^2 \\cdot a^3}{a^4}\\right)^{-2} $$", "correct_answer": "a^{-2}" }
+            ]
+          }
+        },
+        {
+          "nazwa": "Notacja wykładnicza",
+          "waznosc": 2,
+          "waznosc_opis": "Rzadko używane",
+          "kolor": "Szary",
+          "zadania": {
+            "Przekształcanie do notacji wykładniczej": [
+              { "id": "nw1", "content": "Zapisz w notacji wykładniczej: $$ 50000 $$", "correct_answer": "5 \\cdot 10^4" },
+              { "id": "nw2", "content": "Zapisz w notacji wykładniczej: $$ 1270000 $$", "correct_answer": "1.27 \\cdot 10^6" },
+              { "id": "nw3", "content": "Zapisz w notacji wykładniczej: $$ 0.0004 $$", "correct_answer": "4 \\cdot 10^{-4}" },
+              { "id": "nw4", "content": "Zapisz w notacji wykładniczej: $$ 0.0000068 $$", "correct_answer": "6.8 \\cdot 10^{-6}" },
+              { "id": "nw5", "content": "Ziemia oddalona jest od Słońca o ok. $$ 150 \\ 000 \\ 000 \\text{ km} $$. Zapisz tę odległość w notacji wykładniczej.", "correct_answer": "1.5 \\cdot 10^8" },
+              { "id": "nw6", "content": "Zapisz w notacji wykładniczej: $$ 0.0000000302 $$", "correct_answer": "3.02 \\cdot 10^{-8}" }
+            ],
+            "Przekształcanie z notacji wykładniczej": [
+              { "id": "zn1", "content": "Zapisz w postaci dziesiętnej: $$ 3 \\cdot 10^3 $$", "correct_answer": "3000" },
+              { "id": "zn2", "content": "Zapisz w postaci dziesiętnej: $$ 4.5 \\cdot 10^5 $$", "correct_answer": "450000" },
+              { "id": "zn3", "content": "Zapisz w postaci dziesiętnej: $$ 2 \\cdot 10^{-2} $$", "correct_answer": "0.02" },
+              { "id": "zn4", "content": "Zapisz w postaci dziesiętnej: $$ 7.12 \\cdot 10^{-4} $$", "correct_answer": "0.000712" },
+              { "id": "zn5", "content": "Liczba $$ 9.99 \\cdot 10^{2} $$ jest równa:", "correct_answer": "999" },
+              { "id": "zn6", "content": "Zapisz w postaci dziesiętnej: $$ 1.001 \\cdot 10^{-6} $$", "correct_answer": "0.000001001" }
+            ],
+            "Dodawanie, Odejmowanie notacji wykładniczej": [
+              { "id": "do1", "content": "Oblicz: $$ 2 \\cdot 10^3 + 3 \\cdot 10^3 $$", "correct_answer": "5 \\cdot 10^3" },
+              { "id": "do2", "content": "Oblicz: $$ 7.5 \\cdot 10^4 - 2.5 \\cdot 10^4 $$", "correct_answer": "5 \\cdot 10^4" },
+              { "id": "do3", "content": "Oblicz i zapisz w notacji wykładniczej: $$ 4 \\cdot 10^2 + 5 \\cdot 10^3 $$", "correct_answer": "5.4 \\cdot 10^3" },
+              { "id": "do4", "content": "Oblicz: $$ 8 \\cdot 10^{-2} - 3 \\cdot 10^{-2} $$", "correct_answer": "5 \\cdot 10^{-2}" },
+              { "id": "do5", "content": "Oblicz: $$ 1.2 \\cdot 10^5 + 8 \\cdot 10^4 $$", "correct_answer": "2 \\cdot 10^5" },
+              { "id": "do6", "content": "Oblicz: $$ 3 \\cdot 10^{-3} - 5 \\cdot 10^{-4} $$", "correct_answer": "2.5 \\cdot 10^{-3}" }
+            ],
+            "Mnożenie, dzielenie notacji wykładniczej": [
+              { "id": "md1", "content": "Oblicz: $$ (2 \\cdot 10^3) \\cdot (4 \\cdot 10^2) $$", "correct_answer": "8 \\cdot 10^5" },
+              { "id": "md2", "content": "Oblicz: $$ (6 \\cdot 10^8) : (3 \\cdot 10^5) $$", "correct_answer": "2 \\cdot 10^3" },
+              { "id": "md3", "content": "Oblicz: $$ (1.5 \\cdot 10^4) \\cdot (2 \\cdot 10^{-6}) $$", "correct_answer": "3 \\cdot 10^{-2}" },
+              { "id": "md4", "content": "Zapisz wynik w notacji wykładniczej: $$ \\frac{4 \\cdot 10^5}{8 \\cdot 10^2} $$", "correct_answer": "5 \\cdot 10^2" },
+              { "id": "md5", "content": "Oblicz: $$ (5 \\cdot 10^{-3}) \\cdot (3 \\cdot 10^{-4}) $$", "correct_answer": "1.5 \\cdot 10^{-6}" },
+              { "id": "md6", "content": "Zapisz w najprostszej postaci: $$ \\frac{1.2 \\cdot 10^{-2}}{4 \\cdot 10^{-5}} $$", "correct_answer": "300" }
+            ],
+            "Potęgowanie notacji wykładniczej": [
+              { "id": "pn1", "content": "Oblicz: $$ (3 \\cdot 10^2)^2 $$", "correct_answer": "9 \\cdot 10^4" },
+              { "id": "pn2", "content": "Oblicz: $$ (2 \\cdot 10^4)^3 $$", "correct_answer": "8 \\cdot 10^{12}" },
+              { "id": "pn3", "content": "Oblicz: $$ (4 \\cdot 10^{-3})^2 $$", "correct_answer": "1.6 \\cdot 10^{-5}" },
+              { "id": "pn4", "content": "Podnieś do kwadratu: $$ 5 \\cdot 10^{-6} $$", "correct_answer": "2.5 \\cdot 10^{-11}" },
+              { "id": "pn5", "content": "Zapisz w notacji wykładniczej: $$ (0.2 \\cdot 10^5)^2 $$", "correct_answer": "4 \\cdot 10^8" },
+              { "id": "pn6", "content": "Oblicz: $$ (1.1 \\cdot 10^{-2})^2 $$", "correct_answer": "1.21 \\cdot 10^{-4}" }
+            ]
+          }
+        },
+        {
+          "nazwa": "Lokaty",
+          "waznosc": 3,
+          "waznosc_opis": "Standardowe",
+          "kolor": "Żółty",
+          "zadania": {
+            "Obliczanie odsetek": [
+              { "id": "lo1", "content": "Oblicz odsetki od kapitału $$ 1000 \\text{ zł} $$ po roku przy oprocentowaniu prostym $$ 5\\% $$ w skali roku.", "correct_answer": "50 \\text{ zł}" },
+              { "id": "lo2", "content": "Kapitał $$ 5000 \\text{ zł} $$ złożono na lokatę $$ 4\\% $$. Ile wyniosą odsetki po pół roku (kapitalizacja półroczna)?", "correct_answer": "100 \\text{ zł}" },
+              { "id": "lo3", "content": "Oblicz podatek Belki ($$ 19\\% $$) od wypracowanych odsetek w wysokości $$ 200 \\text{ zł} $$.", "correct_answer": "38 \\text{ zł}" },
+              { "id": "lo4", "content": "Ile odsetek „na rękę” (po uwzględnieniu $$ 19\\% $$ podatku) otrzyma klient od kwoty $$ 400 \\text{ zł} $$ odsetek brutto?", "correct_answer": "324 \\text{ zł}" },
+              { "id": "lo5", "content": "Przy oprocentowaniu $$ 6\\% $$ i kapitale $$ 2000 \\text{ zł} $$, ile wyniosą odsetki po $$ 3 $$ miesiącach?", "correct_answer": "30 \\text{ zł}" },
+              { "id": "lo6", "content": "Wpłacono $$ 10 \\ 000 \\text{ zł} $$ na lokatę $$ 2\\% $$. Oblicz odsetki netto po roku, odejmując $$ 19\\% $$ podatku.", "correct_answer": "162 \\text{ zł}" }
+            ],
+            "Obliczanie kapitału po x latach przy y oprocentowaniu": [
+              { "id": "cap1", "content": "Oblicz kapitał końcowy po $$ 2 $$ latach z kwoty $$ 1000 \\text{ zł} $$ przy oprocentowaniu złożonym $$ 10\\% $$ rocznie.", "correct_answer": "1210 \\text{ zł}" },
+              { "id": "cap2", "content": "Zapisz wyrażenie opisujące kapitał po $$ 5 $$ latach dla kwoty $$ K $$ i oprocentowania $$ 3\\% $$ (kapitalizacja roczna).", "correct_answer": "K \\cdot (1.03)^5" },
+              { "id": "cap3", "content": "Ile pieniędzy będzie na koncie po $$ 3 $$ latach, jeśli wpłacono $$ 2000 \\text{ zł} $$ na $$ 5\\% $$ rocznie?", "correct_answer": "2315.25 \\text{ zł}" },
+              { "id": "cap4", "content": "Oblicz kapitał po $$ 2 $$ latach dla $$ 5000 \\text{ zł} $$ przy oprocentowaniu $$ 4\\% $$ i kapitalizacji półrocznej.", "correct_answer": "5412.16 \\text{ zł}" },
+              { "id": "cap5", "content": "Wpłacono $$ 100 \\text{ zł} $$ na $$ 10 $$ lat przy $$ 6\\% $$ rocznie. Zapisz wynik przy użyciu potęgi.", "correct_answer": "100 \\cdot (1.06)^{10}" },
+              { "id": "cap6", "content": "Ile wyniesie kapitał końcowy z $$ 8000 \\text{ zł} $$ po roku, jeśli kapitalizacja jest kwartalna, a oprocentowanie wynosi $$ 4\\% $$ w skali roku?", "correct_answer": "8324.86 \\text{ zł}" }
+            ],
+            "Obliczanie jakie oprocentowanie jest korzystniejszy": [
+              { "id": "comp1", "content": "Co jest korzystniejsze: lokata $$ 6\\% $$ z kapitalizacją roczną czy $$ 6\\% $$ z kapitalizacją półroczną?", "correct_answer": "Kapitalizacja półroczna" },
+              { "id": "comp2", "content": "Porównaj kapitał po roku: $$ 1000 \\text{ zł} $$ na $$ 4\\% $$ (kap. roczna) vs $$ 1000 \\text{ zł} $$ na $$ 3.9\\% $$ (kap. miesięczna).", "correct_answer": "4\\% roczna" },
+              { "id": "comp3", "content": "Czy lepiej trzymać pieniądze przez $$ 2 $$ lata na $$ 5\\% $$ czy przez rok na $$ 10\\% $$ (oprocentowanie proste)?", "correct_answer": "Wyjdzie tyle samo" },
+              { "id": "comp4", "content": "Która oferta da większy zysk po $$ 2 $$ latach: $$ 10\\% $$ co rok, czy $$ 5\\% $$ co pół roku?", "correct_answer": "5\\% co pół roku" },
+              { "id": "comp5", "content": "Wybierz lepszą lokatę dla $$ 1000 \\text{ zł} $$ na rok: lokata A ($$ 5\\% $$ bez podatku) czy lokata B ($$ 6\\% $$ z podatkiem $$ 19\\% $$)?", "correct_answer": "Lokata A" },
+              { "id": "comp6", "content": "Sprawdź, czy lokata $$ 8\\% $$ z kapitalizacją roczną jest gorsza niż $$ 7.8\\% $$ z kapitalizacją dzienną.", "correct_answer": "8\\% roczna jest lepsza" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "nazwa": "Pierwiastki",
+      "subtematy": [
+        {
+          "nazwa": "Pierwiastki stopnia parzystego",
+          "waznosc": 5,
+          "waznosc_opis": "Bardzo ważne!",
+          "kolor": "Czerwony",
+          "zadania": {
+            "Obliczanie pierwiastków z liczb całkowitych": [],
+            "Obliczanie pierwiastków z liczb wymiernych": [],
+            "Pomiędzy jakimi liczbami całkowitymi leży pierwiastek x": []
+          }
+        },
+        {
+          "nazwa": "Pierwiastki stopnia nieparzystego",
+          "waznosc": 5,
+          "waznosc_opis": "Bardzo ważne!",
+          "kolor": "Czerwony",
+          "zadania": {
+            "Obliczanie pierwiastków z liczb całkowitych ujemnych": [],
+            "Obliczanie pierwiastków z liczb wymiernych ujemnych": [],
+            "Pomiędzy jakimi liczbami całkowitymi leży pierwiastek x": []
+          }
+        },
+        {
+          "nazwa": "Wzory na pierwiastkach, mnożenie, dzielenie, potęgowanie",
+          "waznosc": 5,
+          "waznosc_opis": "Bardzo ważne!",
+          "kolor": "Czerwony",
+          "zadania": {
+            "Włączanie czynnika pod pierwiastkiem": [],
+            "Porównywanie liczb przedstawionych jako iloczyn całkowitej i pierwiastka": [],
+            "Wyciąganie liczby przed pierwiastek": [],
+            "Mnożenie, dzielenie pierwiastków": [],
+            "Potęgowanie pierwiastków": []
+          }
+        },
+        {
+          "nazwa": "Wyciąganie niewymierności",
+          "waznosc": 3,
+          "waznosc_opis": "Standardowe",
+          "kolor": "Żółty",
+          "zadania": {
+            "Wyciąganie niewymierności z łatwym licznikiem nie wymagających wzorów skróconego mnożenia": [],
+            "Wyciąganie niewymierności z trudnym licznikiem nie wymagających wzorów skróconego mnożenia": []
+          }
+        }
+      ]
+    },
+    {
+      "nazwa": "Potęgi o wykładniku nie-całkowitym",
+      "subtematy": [
+        {
+          "nazwa": "Zamiana Pierwiastków na potęgi",
+          "waznosc": 3,
+          "waznosc_opis": "Standardowe",
+          "kolor": "Żółty",
+          "zadania": {
+            "Działania z potęgami i pierwiastkami o tych samych podstawach": [],
+            "Obliczanie zagnieżdżonych pierwiastków": []
+          }
+        },
+        {
+          "nazwa": "Potęgi o wykładniku wymiernym",
+          "waznosc": 3,
+          "waznosc_opis": "Standardowe",
+          "kolor": "Żółty",
+          "zadania": {
+            "Obliczanie potęg o wykładniku wymiernym": [],
+            "Obliczanie skomplikowanych wyrażeń o wykładniku wymiernym": [],
+            "Przedstawianie liczb w postaci jednej potęgi"
+          }
+        },
+        {
+          "nazwa": "Potęgi o wykładniku rzeczywistym",
+          "waznosc": 3,
+          "waznosc_opis": "Standardowe",
+          "kolor": "Żółty",
+          "zadania": {
+            "Obliczanie potęg o wykładniku rzeczywistym": [],
+            "Obliczanie skomplikowanych wyrażeń o wykładniku rzeczywistym": []
+          }
+        }
+      ]
+    }
+  ]
+}
