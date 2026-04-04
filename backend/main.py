@@ -43,12 +43,12 @@ async def get_nodes():
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
-        # Fetch nodes
-        cur.execute("SELECT id, name, description FROM public.nodes;")
+        # Fetch nodes (topics)
+        cur.execute("SELECT id, name FROM public.topics;")
         nodes = cur.fetchall()
         
-        # Fetch edges (Many-to-Many equivalent of parent_id)
-        cur.execute("SELECT parent_id as source, child_id as target FROM public.node_edges;")
+        # Fetch edges (topic_edges)
+        cur.execute("SELECT parent_id as source, child_id as target FROM public.topic_edges;")
         edges = cur.fetchall()
         
         cur.close()
@@ -60,13 +60,13 @@ async def get_nodes():
 @app.get("/api/v1/nodes/{node_id}/lessons")
 async def get_node_lessons(node_id: str):
     """
-    Pulls all lessons associated with a specific node.
+    Pulls all lessons (subtopics) associated with a specific node (topic).
     """
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
-        cur.execute("SELECT id, title, video_url, content_markdown FROM public.lessons WHERE node_id = %s ORDER BY created_at ASC;", (node_id,))
+        cur.execute("SELECT id, name as title, importance FROM public.subtopics WHERE topic_id = %s ORDER BY created_at ASC;", (node_id,))
         lessons = cur.fetchall()
         
         cur.close()

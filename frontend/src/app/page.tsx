@@ -191,7 +191,7 @@ export default function Home() {
                             onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
                             >
                                 <h4 style={{ margin: '0 0 5px 0', color: '#1e3a8a', fontSize: '1rem' }}>{lesson.title}</h4>
-                                {lesson.video_url && <span style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: 'bold', display: 'block', marginTop: '4px' }}>► Video available</span>}
+                                {lesson.importance && <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 'bold', display: 'block', marginTop: '4px' }}>Importance: {lesson.importance} / 5</span>}
                             </li>
                         ))}
                     </ul>
