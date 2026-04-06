@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lokalny Panel (Python Backend)</title>
+    <style>
+        /* Ten sam wygląd co wcześniej */
+        body { font-family: sans-serif; background: #f4f7f6; padding: 20px; display: flex; justify-content: center; }
+        .container { display: flex; gap: 20px; width: 100%; max-width: 1000px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex: 1; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
+        li:hover { background: #f8f9fa; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #27ae60; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; width: 100%; }
+        #status { margin-top: 15px; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>Lista Tematów</h2>
+        <ul id="lista-tematow"><li>Ładowanie...</li></ul>
+    </div>
+
+    <div class="card">
+        <h2>Edytuj Temat</h2>
+        <form id="formularz" style="display: none;">
+            <input type="hidden" id="edit-id">
+            <div class="form-group">
+                <label>Nazwa tematu:</label>
+                <input type="text" id="edit-nazwa" required>
+            </div>
+            <div class="form-group">
+                <label>Opis:</label>
+                <textarea id="edit-opis" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Trudność:</label>
+                <select id="edit-trudnosc">
+                    <option value="latwe">Łatwe</option>
+                    <option value="srednie">Średnie</option>
+                    <option value="trudne">Trudne</option>
+                </select>
+            </div>
+            <button type="submit">Zapisz zmiany</button>
+            <div id="status"></div>
+        </form>
+        <p id="wybierz-info">Wybierz temat z listy po lewej.</p>
+    </div>
+</div>
+
+<script>
+    let aktualneTematy = [];
+    const API_URL = 'http://localhost:5000/api/tematy'; // Gadamy z Pythonem!
+
+    // Pobieranie danych z Pythona
+    async function pobierzDane() {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        aktualneTematy = data;
+        
+        const lista = document.getElementById('lista-tematow');
+        lista.innerHTML = '';
+        data.forEach(temat => {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${temat.nazwa}</strong> <span>✏️</span>`;
+            li.onclick = () => otworzDoEdycji(temat.id);
+            lista.appendChild(li);
+        });
+    }
+
+    function otworzDoEdycji(id) {
+        const temat = aktualneTematy.find(t => t.id === id);
+        document.getElementById('formularz').style.display = 'block';
+        document.getElementById('wybierz-info').style.display = 'none';
+        document.getElementById('status').innerText = '';
+
+        document.getElementById('edit-id').value = temat.id;
+        document.getElementById('edit-nazwa').value = temat.nazwa || '';
+        document.getElementById('edit-opis').value = temat.opis || '';
+        document.getElementById('edit-trudnosc').value = temat.trudnosc || 'latwe';
+    }
+
+    // Wysyłanie zmian do Pythona
+    document.getElementById('formularz').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-id').value;
+        const statusDiv = document.getElementById('status');
+        statusDiv.innerText = 'Zapisywanie...';
+
+        const noweDane = {
+            nazwa: document.getElementById('edit-nazwa').value,
+            opis: document.getElementById('edit-opis').value,
+            trudnosc: document.getElementById('edit-trudnosc').value
+        };
+
+        const response = await fetch(`${API_URL}/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(noweDane)
+        });
+
+        if (response.ok) {
+            statusDiv.innerText = 'Pomyślnie zaktualizowano!';
+            statusDiv.style.color = 'green';
+            pobierzDane(); // Odśwież listę
+        } else {
+            statusDiv.innerText = 'Wystąpił błąd.';
+            statusDiv.style.color = 'red';
+        }
+    });
+
+    pobierzDane();
+</script>
+</body>
+</html>
