@@ -10,7 +10,6 @@ supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_
 app = Flask(__name__)
 CORS(app)
 
-# Pobiera CAŁĄ strukturę bazy za jednym razem
 @app.route('/api/data', methods=['GET'])
 def pobierz_wszystko():
     try:
@@ -24,7 +23,6 @@ def pobierz_wszystko():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Uniwersalny endpoint do aktualizacji DOWOLNEJ tabeli
 @app.route('/api/update/<table>/<id>', methods=['POST'])
 def aktualizuj(table, id):
     try:
@@ -34,6 +32,17 @@ def aktualizuj(table, id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# NOWY ENDPOINT: Dodawanie nowych rekordów
+@app.route('/api/create/<table>', methods=['POST'])
+def stworz(table):
+    try:
+        nowe_dane = request.json
+        # Usuwamy id z danych, jeśli przyszło puste, żeby Supabase wygenerował UUID
+        if "id" in nowe_dane: del nowe_dane["id"]
+        res = supabase.table(table).insert(nowe_dane).execute()
+        return jsonify({"status": "sukces", "data": res.data})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
-    print("Serwer API działa na http://localhost:5000")
     app.run(port=5000)
