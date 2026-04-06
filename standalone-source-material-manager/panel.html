@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>MatGraph Admin Panel</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; color: #333; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* MENU BOCZNE */
+        .sidebar { width: 250px; background: #2c3e50; color: white; display: flex; flex-direction: column; padding-top: 20px; }
+        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 20px; color: #ecf0f1; }
+        .menu-btn { background: none; border: none; color: #bdc3c7; padding: 15px 20px; text-align: left; font-size: 16px; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; }
+        .menu-btn:hover { background: #34495e; color: white; }
+        .menu-btn.active { background: #34495e; color: #3498db; border-left-color: #3498db; font-weight: bold; }
+        
+        /* GŁÓWNA ZAWARTOŚĆ */
+        .content { flex: 1; padding: 20px; overflow-y: auto; }
+        .view { display: none; gap: 20px; height: 100%; }
+        .view.active { display: flex; }
+        
+        /* KARTY (Lista i Formularz) */
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        .card.list-card { flex: 1; overflow-y: auto; }
+        .card.form-card { flex: 1; }
+        
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; flex-direction: column; }
+        li:hover { background: #f8f9fa; }
+        .badge { font-size: 11px; background: #9b59b6; color: white; padding: 3px 7px; border-radius: 4px; align-self: flex-start; margin-bottom: 5px; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px;}
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button.save-btn { background: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        button.save-btn:hover { background: #219150; }
+        
+        .status { margin-top: 15px; text-align: center; font-weight: bold; }
+        .success { color: #27ae60; }
+        .error { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>MatGraph Panel</h2>
+    <button class="menu-btn active" onclick="zmienZakladke('chapters')">📁 Działy (Chapters)</button>
+    <button class="menu-btn" onclick="zmienZakladke('topics')">📄 Tematy (Topics)</button>
+    <button class="menu-btn" onclick="zmienZakladke('subtopics')">📑 Podtematy (Subtopics)</button>
+    <button class="menu-btn" onclick="zmienZakladke('task_groups')">🗂️ Grupy Zadań</button>
+    <button class="menu-btn" onclick="zmienZakladke('tasks')">📝 Zadania (Tasks)</button>
+</div>
+
+<div class="content">
+
+    <div id="view-chapters" class="view active">
+        <div class="card list-card">
+            <h2>Lista Działów</h2><ul id="list-chapters"></ul>
+        </div>
+        <div class="card form-card">
+            <h2>Edytuj Dział</h2>
+            <form onsubmit="zapiszDane(event, 'chapters')">
+                <input type="hidden" id="chapters-id">
+                <div class="form-group"><label>Nazwa:</label><input type="text" id="chapters-name" required></div>
+                <button type="submit" class="save-btn">Zapisz zmianę</button>
+                <div id="status-chapters" class="status"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="view-topics" class="view">
+        <div class="card list-card">
+            <h2>Lista Tematów</h2><ul id="list-topics"></ul>
+        </div>
+        <div class="card form-card">
+            <h2>Edytuj Temat</h2>
+            <form onsubmit="zapiszDane(event, 'topics')">
+                <input type="hidden" id="topics-id">
+                <div class="form-group"><label>Przypisany Dział:</label><select id="topics-chapter_id" required></select></div>
+                <div class="form-group"><label>Nazwa tematu:</label><input type="text" id="topics-name" required></div>
+                <div class="form-group"><label>Video URL:</label><input type="text" id="topics-video_url"></div>
+                <button type="submit" class="save-btn">Zapisz zmianę</button>
+                <div id="status-topics" class="status"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="view-subtopics" class="view">
+        <div class="card list-card">
+            <h2>Lista Podtematów</h2><ul id="list-subtopics"></ul>
+        </div>
+        <div class="card form-card">
+            <h2>Edytuj Podtemat</h2>
+            <form onsubmit="zapiszDane(event, 'subtopics')">
+                <input type="hidden" id="subtopics-id">
+                <div class="form-group"><label>Przypisany Temat:</label><select id="subtopics-topic_id" required></select></div>
+                <div class="form-group"><label>Nazwa podtematu:</label><input type="text" id="subtopics-name" required></div>
+                <div class="form-group"><label>Ważność (1-5):</label><input type="number" id="subtopics-importance" min="1" max="5" required></div>
+                <button type="submit" class="save-btn">Zapisz zmianę</button>
+                <div id="status-subtopics" class="status"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="view-task_groups" class="view">
+        <div class="card list-card">
+            <h2>Grupy Zadań</h2><ul id="list-task_groups"></ul>
+        </div>
+        <div class="card form-card">
+            <h2>Edytuj Grupę</h2>
+            <form onsubmit="zapiszDane(event, 'task_groups')">
+                <input type="hidden" id="task_groups-id">
+                <div class="form-group"><label>Przypisany Podtemat:</label><select id="task_groups-subtopic_id" required></select></div>
+                <div class="form-group"><label>Nazwa grupy:</label><input type="text" id="task_groups-name" required></div>
+                <button type="submit" class="save-btn">Zapisz zmianę</button>
+                <div id="status-task_groups" class="status"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="view-tasks" class="view">
+        <div class="card list-card">
+            <h2>Zadania</h2><ul id="list-tasks"></ul>
+        </div>
+        <div class="card form-card">
+            <h2>Edytuj Zadanie</h2>
+            <form onsubmit="zapiszDane(event, 'tasks')">
+                <input type="hidden" id="tasks-id">
+                <div class="form-group"><label>Grupa Zadań:</label><select id="tasks-task_group_id" required></select></div>
+                <div class="form-group"><label>Treść:</label><textarea id="tasks-content" rows="4" required></textarea></div>
+                <div class="form-group"><label>Trudność:</label>
+                    <select id="tasks-difficulty_level">
+                        <option value="Easy">Easy</option><option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option><option value="Very Hard">Very Hard</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Poprawna odp:</label><input type="text" id="tasks-correct_answer"></div>
+                <div class="form-group"><label>Video URL:</label><input type="text" id="tasks-video_url"></div>
+                <button type="submit" class="save-btn">Zapisz zmianę</button>
+                <div id="status-tasks" class="status"></div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const API_URL = 'http://localhost:5000/api';
+    let DB = {}; // Tu przechowujemy całą bazę
+
+    // --- NAWIGACJA ZAKŁADEK ---
+    function zmienZakladke(widok) {
+        document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById('view-' + widok).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // --- POBIERANIE CAŁEJ BAZY ---
+    async function wczytajBaze() {
+        try {
+            const res = await fetch(`${API_URL}/data`);
+            DB = await res.json();
+            odswiezInterfejs();
+        } catch(e) {
+            alert("Błąd połączenia z Pythonem! Czy serwer działa na porcie 5000?");
+        }
+    }
+
+    // --- RYSOWANIE LIST I LIST ROZWIJANYCH ---
+    function odswiezInterfejs() {
+        // 1. Działy
+        rysujListe('chapters', DB.chapters, (d) => `<strong>${d.name}</strong>`);
+        
+        // 2. Tematy (z dropdownem działów)
+        rysujDropdown('topics-chapter_id', DB.chapters);
+        rysujListe('topics', DB.topics, (d) => `<span class="badge">${d.chapters?.name || ''}</span> <strong>${d.name}</strong>`);
+        
+        // 3. Podtematy (z dropdownem tematów)
+        rysujDropdown('subtopics-topic_id', DB.topics);
+        rysujListe('subtopics', DB.subtopics, (d) => `<span class="badge">${d.topics?.name || ''}</span> <strong>${d.name}</strong>`);
+        
+        // 4. Grupy Zadań (z dropdownem podtematów)
+        rysujDropdown('task_groups-subtopic_id', DB.subtopics);
+        rysujListe('task_groups', DB.task_groups, (d) => `<span class="badge">${d.subtopics?.name || ''}</span> <strong>${d.name}</strong>`);
+        
+        // 5. Zadania (z dropdownem grup)
+        rysujDropdown('tasks-task_group_id', DB.task_groups);
+        rysujListe('tasks', DB.tasks, (d) => `<span class="badge">${d.task_groups?.name || ''} | ${d.difficulty_level}</span> <span>${d.content.substring(0,40)}...</span>`);
+    }
+
+    // Funkcje pomocnicze do HTML
+    function rysujDropdown(idSelektora, tablicaDanych) {
+        const select = document.getElementById(idSelektora);
+        select.innerHTML = '<option value="">Wybierz...</option>';
+        tablicaDanych.forEach(item => {
+            select.innerHTML += `<option value="${item.id}">${item.name || item.content.substring(0,30)}</option>`;
+        });
+    }
+
+    function rysujListe(tabela, dane, formatHtml) {
+        const ul = document.getElementById(`list-${tabela}`);
+        ul.innerHTML = '';
+        dane.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div style="display:flex; flex-direction:column; width:100%">${formatHtml(item)}</div>`;
+            li.onclick = () => zaladujDoFormularza(tabela, item.id);
+            ul.appendChild(li);
+        });
+    }
+
+    // --- WYPEŁNIANIE FORMULARZY ---
+    function zaladujDoFormularza(tabela, id) {
+        const item = DB[tabela].find(x => x.id === id);
+        if(!item) return;
+
+        // Reset statusu
+        document.getElementById(`status-${tabela}`).innerText = '';
+
+        // Automatyczne dopasowanie ID z bazy do pól w HTML (np. edit-id, edit-name)
+        for (let klucz in item) {
+            const pole = document.getElementById(`${tabela}-${klucz}`);
+            if (pole) {
+                pole.value = item[klucz] || '';
+            }
+        }
+    }
+
+    // --- WYSYŁANIE ZMIAN DO BAZY ---
+    async function zapiszDane(event, tabela) {
+        event.preventDefault();
+        
+        const id = document.getElementById(`${tabela}-id`).value;
+        if(!id) { alert("Wybierz element z listy!"); return; }
+        
+        const statusDiv = document.getElementById(`status-${tabela}`);
+        statusDiv.innerText = 'Zapisywanie...';
+        statusDiv.className = 'status';
+
+        // Zbieranie wszystkich pól formularza powiązanych z tą tabelą
+        const noweDane = {};
+        const inputs = event.target.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if(input.id && input.id !== `${tabela}-id`) {
+                const nazwaKolumny = input.id.replace(`${tabela}-`, ''); // Wyciąga nazwę kolumny, np. "name"
+                noweDane[nazwaKolumny] = input.value || null;
+            }
+        });
+
+        // Wysłanie uniwersalnego requestu do Pythona
+        const res = await fetch(`${API_URL}/update/${tabela}/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(noweDane)
+        });
+
+        if (res.ok) {
+            statusDiv.innerText = 'Pomyślnie zapisano!';
+            statusDiv.classList.add('success');
+            await wczytajBaze(); // Przeładowuje wszystko, żeby pokazać odświeżone listy
+        } else {
+            statusDiv.innerText = 'Błąd zapisu!';
+            statusDiv.classList.add('error');
+        }
+    }
+
+    // Start aplikacji
+    wczytajBaze();
+</script>
+
+</body>
+</html>
