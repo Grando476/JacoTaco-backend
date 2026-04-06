@@ -43,6 +43,14 @@ def stworz(table):
         return jsonify({"status": "sukces", "data": res.data})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/delete/<table>/<id>', methods=['DELETE'])
+def usun(table, id):
+    try:
+        supabase.table(table).delete().eq("id", id).execute()
+        return jsonify({"status": "sukces"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(port=5000)
