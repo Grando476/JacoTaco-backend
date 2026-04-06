@@ -26,6 +26,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+__pycache__/
+venv/
 .env*.local
 .env
 

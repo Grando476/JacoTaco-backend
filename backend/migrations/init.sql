@@ -1,3 +1,5 @@
+CREATE TYPE task_difficulty AS ENUM ('Easy', 'Medium', 'Hard', 'Very Hard');
+
 -- 1. Działy
 CREATE TABLE IF NOT EXISTS public.chapters (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -45,9 +47,10 @@ CREATE TABLE IF NOT EXISTS public.task_groups (
 CREATE TABLE IF NOT EXISTS public.tasks (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     task_group_id UUID NOT NULL REFERENCES public.task_groups(id) ON DELETE CASCADE,
-    content TEXT NOT NULL, 
+    content TEXT NOT NULL,
+    difficulty_level task_difficulty DEFAULT 'Easy' NOT NULL, -- Tutaj używasz typu
     correct_answer TEXT, 
-    video_url TEXT, -- Link do rozwiązania wideo dla konkretnego zadania
+    video_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
