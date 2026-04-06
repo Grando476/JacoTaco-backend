@@ -4,32 +4,36 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
-# Wczytanie bezpiecznych kluczy z pliku .env
 load_dotenv()
 supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
 app = Flask(__name__)
-CORS(app) # Pozwala naszemu plikowi HTML łączyć się z tym skryptem
+CORS(app)
 
-# 1. Endpoint do pobierania danych
-@app.route('/api/tematy', methods=['GET'])
-def pobierz_tematy():
+# Pobiera CAŁĄ strukturę bazy za jednym razem
+@app.route('/api/data', methods=['GET'])
+def pobierz_wszystko():
     try:
-        response = supabase.table("topics").select("*").order("id").execute()
-        return jsonify(response.data)
+        return jsonify({
+            "chapters": supabase.table("chapters").select("*").order("created_at").execute().data,
+            "topics": supabase.table("topics").select("*, chapters(name)").order("created_at").execute().data,
+            "subtopics": supabase.table("subtopics").select("*, topics(name)").order("created_at").execute().data,
+            "task_groups": supabase.table("task_groups").select("*, subtopics(name)").order("created_at").execute().data,
+            "tasks": supabase.table("tasks").select("*, task_groups(name)").order("created_at").execute().data
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# 2. Endpoint do aktualizacji danych
-@app.route('/api/tematy/<int:id>', methods=['POST'])
-def aktualizuj_temat(id):
+# Uniwersalny endpoint do aktualizacji DOWOLNEJ tabeli
+@app.route('/api/update/<table>/<id>', methods=['POST'])
+def aktualizuj(table, id):
     try:
         nowe_dane = request.json
-        response = supabase.table("topics").update(nowe_dane).eq("id", id).execute()
-        return jsonify({"status": "sukces", "data": response.data})
+        supabase.table(table).update(nowe_dane).eq("id", id).execute()
+        return jsonify({"status": "sukces"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    print("Serwer działa na http://localhost:5000")
+    print("Serwer API działa na http://localhost:5000")
     app.run(port=5000)
