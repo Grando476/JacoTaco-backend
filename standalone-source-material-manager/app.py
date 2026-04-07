@@ -11,44 +11,51 @@ app = Flask(__name__)
 CORS(app)
 
 @app.route('/api/data', methods=['GET'])
-def pobierz_wszystko():
+def get_data():
     try:
         return jsonify({
             "chapters": supabase.table("chapters").select("*").order("created_at").execute().data,
             "topics": supabase.table("topics").select("*, chapters(name)").order("created_at").execute().data,
-            "subtopics": supabase.table("subtopics").select("*, topics(name)").order("created_at").execute().data,
+            "subtopics": supabase.table("subtopics").select("*, topics(name)").order("sort_order").execute().data,
             "task_groups": supabase.table("task_groups").select("*, subtopics(name)").order("created_at").execute().data,
-            "tasks": supabase.table("tasks").select("*, task_groups(name)").order("created_at").execute().data
+            "tasks": supabase.table("tasks").select("*, task_groups(name)").order("created_at").execute().data,
+            "topic_edges": supabase.table("topic_edges").select("*").execute().data
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/update/<table>/<id>', methods=['POST'])
-def aktualizuj(table, id):
+def update_data(table, id):
     try:
-        nowe_dane = request.json
-        supabase.table(table).update(nowe_dane).eq("id", id).execute()
-        return jsonify({"status": "sukces"})
+        new_data = request.json
+        supabase.table(table).update(new_data).eq("id", id).execute()
+        return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# NOWY ENDPOINT: Dodawanie nowych rekordów
 @app.route('/api/create/<table>', methods=['POST'])
-def stworz(table):
+def create_data(table):
     try:
-        nowe_dane = request.json
-        # Usuwamy id z danych, jeśli przyszło puste, żeby Supabase wygenerował UUID
-        if "id" in nowe_dane: del nowe_dane["id"]
-        res = supabase.table(table).insert(nowe_dane).execute()
-        return jsonify({"status": "sukces", "data": res.data})
+        new_data = request.json
+        if "id" in new_data: del new_data["id"]
+        res = supabase.table(table).insert(new_data).execute()
+        return jsonify({"status": "success", "data": res.data})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 @app.route('/api/delete/<table>/<id>', methods=['DELETE'])
-def usun(table, id):
+def delete_data(table, id):
     try:
         supabase.table(table).delete().eq("id", id).execute()
-        return jsonify({"status": "sukces"})
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/delete_edge/<parent_id>/<child_id>', methods=['DELETE'])
+def delete_edge(parent_id, child_id):
+    try:
+        supabase.table("topic_edges").delete().eq("parent_id", parent_id).eq("child_id", child_id).execute()
+        return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

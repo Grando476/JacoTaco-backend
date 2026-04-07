@@ -11,19 +11,22 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; margin: 0; display: flex; height: 100vh; overflow: hidden; color: #333; }
         
-        /* MAIN LAYOUT WITH RESIZER */
         .sidebar { width: 400px; min-width: 250px; background: white; display: flex; flex-direction: column; flex-shrink: 0; }
         .resizer { width: 5px; background: #ddd; cursor: col-resize; transition: background 0.2s; flex-shrink: 0; z-index: 10; }
         .resizer:hover, .resizer.resizing { background: #3498db; }
         .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; min-width: 400px; }
         
-        /* HEADERS AND CARDS */
-        .sidebar-header { background: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header { background: #2c3e50; color: white; padding: 15px 20px; display: flex; flex-direction: column; gap: 10px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .sidebar-header h2 { margin: 0; font-size: 18px; }
+        .header-buttons { display: flex; gap: 10px; width: 100%; }
+        .header-buttons button { flex: 1; background: #34495e; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .header-buttons button:hover { background: #465c71; }
+        .header-buttons button.active { background: #3498db; }
+        
         .sidebar-content { flex: 1; overflow-y: auto; padding: 10px; }
         .form-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%; max-width: 800px; }
         
-        /* FOLDER TREE */
         ul.tree { list-style-type: none; padding-left: 20px; margin: 0; }
         ul.tree-root { padding-left: 0; }
         .tree-node { display: flex; align-items: center; padding: 6px 4px; border-radius: 4px; transition: background 0.2s; position: relative; }
@@ -36,7 +39,6 @@
         .node-title { flex: 1; cursor: pointer; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; }
         .node-title:hover { color: #3498db; }
         
-        /* [+] Button */
         .add-child-btn { background: #2ecc71; color: white; border: none; border-radius: 3px; cursor: pointer; padding: 2px 6px; font-size: 11px; opacity: 0; transition: opacity 0.2s; }
         .tree-node:hover .add-child-btn { opacity: 1; }
         .add-child-btn:hover { background: #27ae60; }
@@ -44,14 +46,12 @@
         .nested { display: none; }
         .nested.active { display: block; }
         
-        /* FORM */
         .form-title { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; color: #2c3e50; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; color: #555;}
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
         textarea { resize: vertical; }
         
-        /* ACTION BUTTONS */
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
         .save-btn { background: #3498db; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; flex: 2; transition: 0.2s; }
         .save-btn:hover { background: #2980b9; }
@@ -64,18 +64,27 @@
         .latex-preview { background: #fdfdfd; border: 1px dashed #bdc3c7; padding: 10px; margin-top: 5px; min-height: 20px; font-size: 15px; }
         
         #empty-state { text-align: center; color: #95a5a6; margin-top: 100px; }
+        
+        /* Edges Manager Styles */
+        .edge-list { margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
+        .edge-item { display: flex; justify-content: space-between; background: #f8f9fa; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px; }
+        .btn-sm-del { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>Database Explorer</h2>
-        <button onclick="createNew('chapters', null, null)" style="background:#2ecc71; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">+ New Chapter</button>
+        <div class="header-top">
+            <h2>DB Explorer</h2>
+            <button onclick="createNew('chapters', null, null)" style="background:#2ecc71; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">+ Chapter</button>
+        </div>
+        <div class="header-buttons">
+            <button id="tab-tree" class="active" onclick="switchTab('tree')">📂 Tree View</button>
+            <button id="tab-edges" onclick="switchTab('edges')">🔗 Topic Relations</button>
+        </div>
     </div>
-    <div class="sidebar-content" id="tree-container">
-        Loading tree...
-    </div>
+    <div class="sidebar-content" id="tree-container">Loading tree...</div>
 </div>
 
 <div class="resizer" id="resizer"></div>
@@ -91,54 +100,52 @@
         <form id="dynamic-form" onsubmit="saveData(event)">
             <input type="hidden" id="form-table"> 
             <input type="hidden" id="form-id"> 
-            
             <div id="form-fields"></div> 
-            
             <div class="btn-group">
                 <button type="submit" class="save-btn">Save to database</button>
-                <button type="button" class="delete-btn" id="delete-btn" onclick="deleteData()">Delete element</button>
+                <button type="button" class="delete-btn" id="delete-btn" onclick="deleteData()">Delete</button>
             </div>
-            
             <div id="status-msg" class="status"></div>
         </form>
+    </div>
+
+    <div class="form-card" id="edges-manager" style="display: none;">
+        <h2 class="form-title">Topic Relations (DAG)</h2>
+        <p>Define which topic must be completed before starting another.</p>
+        
+        <div class="form-group">
+            <label>1. Select Target Topic (Child):</label>
+            <select id="edge-child-select" onchange="loadTopicEdges()"></select>
+        </div>
+
+        <div class="form-group" style="margin-top: 30px;">
+            <label>2. Add Required Prerequisite (Parent):</label>
+            <div style="display: flex; gap: 10px;">
+                <select id="edge-parent-select" style="flex: 1;"></select>
+                <button type="button" onclick="addEdge()" class="save-btn" style="flex: unset; padding: 10px 20px;">Add Link</button>
+            </div>
+        </div>
+
+        <div class="edge-list" id="current-edges-list">
+            <label>Current Prerequisites for this Topic:</label>
+            </div>
     </div>
 </div>
 
 <script>
     const API_URL = 'http://localhost:5000/api';
     let DB = {};
+    let expandedNodes = new Set(); 
 
-    // ==========================================
-    // 0. SIDEBAR RESIZER LOGIC
-    // ==========================================
+    // Sidebar Resizer
     const resizer = document.getElementById('resizer');
     const sidebar = document.getElementById('sidebar');
     let isResizing = false;
+    resizer.addEventListener('mousedown', () => { isResizing = true; document.body.style.cursor = 'col-resize'; resizer.classList.add('resizing'); });
+    document.addEventListener('mousemove', (e) => { if (!isResizing) return; sidebar.style.width = Math.max(200, Math.min(e.clientX, window.innerWidth - 400)) + 'px'; });
+    document.addEventListener('mouseup', () => { isResizing = false; document.body.style.cursor = 'default'; resizer.classList.remove('resizing'); });
 
-    resizer.addEventListener('mousedown', (e) => {
-        isResizing = true;
-        document.body.style.cursor = 'col-resize';
-        resizer.classList.add('resizing');
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (!isResizing) return;
-        // Restrict width: minimum 200px, maximum is screen width minus 400px
-        const newWidth = Math.max(200, Math.min(e.clientX, window.innerWidth - 400));
-        sidebar.style.width = newWidth + 'px';
-    });
-
-    document.addEventListener('mouseup', () => {
-        if (isResizing) {
-            isResizing = false;
-            document.body.style.cursor = 'default';
-            resizer.classList.remove('resizing');
-        }
-    });
-
-    // ==========================================
-    // 1. DATA STRUCTURE
-    // ==========================================
+    // 1. DATA SCHEMA (UPDATED)
     const SCHEMA = {
         chapters: {
             title: "Chapter", childTable: "topics", fkName: null,
@@ -146,11 +153,17 @@
         },
         topics: {
             title: "Topic", childTable: "subtopics", fkName: "chapter_id", parentTable: "chapters",
-            fields: [{ name: 'chapter_id', label: 'Assigned Chapter', type: 'select', source: 'chapters' }, { name: 'name', label: 'Topic Name', type: 'text' }, { name: 'video_url', label: 'Video URL (optional)', type: 'text' }]
+            fields: [{ name: 'chapter_id', label: 'Assigned Chapter', type: 'select', source: 'chapters' }, { name: 'name', label: 'Topic Name', type: 'text' }]
         },
         subtopics: {
             title: "Subtopic", childTable: "task_groups", fkName: "topic_id", parentTable: "topics",
-            fields: [{ name: 'topic_id', label: 'Assigned Topic', type: 'select', source: 'topics' }, { name: 'name', label: 'Subtopic Name', type: 'text' }, { name: 'importance', label: 'Importance (1-5)', type: 'number' }]
+            fields: [
+                { name: 'topic_id', label: 'Assigned Topic', type: 'select', source: 'topics' }, 
+                { name: 'name', label: 'Subtopic Name', type: 'text' }, 
+                { name: 'importance', label: 'Importance (1-5)', type: 'number' },
+                { name: 'sort_order', label: 'Sort Order (Position)', type: 'number' },
+                { name: 'video_url', label: 'Video URL (optional)', type: 'text' }
+            ]
         },
         task_groups: {
             title: "Task Group", childTable: "tasks", fkName: "subtopic_id", parentTable: "subtopics",
@@ -168,14 +181,14 @@
         }
     };
 
-    // ==========================================
-    // 2. TREE AND DATABASE
-    // ==========================================
+    // 2. CORE LOGIC
     async function loadDatabase() {
         try {
             const res = await fetch(`${API_URL}/data`);
             DB = await res.json();
+            if(!DB.topic_edges) DB.topic_edges = []; // Fallback if backend not updated yet
             buildTree();
+            populateEdgesDropdowns();
         } catch(e) {
             document.getElementById('tree-container').innerHTML = "<span style='color:red'>Connection error with Python. Start the server!</span>";
         }
@@ -199,18 +212,20 @@
         if (childTable) {
             const childFk = SCHEMA[childTable].fkName;
             children = DB[childTable].filter(child => child[childFk] === item.id);
+            if (table === 'subtopics') children.sort((a,b) => (a.sort_order || 0) - (b.sort_order || 0)); // Sort UI
         }
 
         const hasChildren = children.length > 0;
         const displayName = item.name || (item.content ? item.content.substring(0, 30) + "..." : "Unnamed");
+        const isExpanded = expandedNodes.has(item.id);
 
         li.innerHTML = `
             <div class="tree-node">
-                <span class="caret ${hasChildren ? '' : 'empty'}" onclick="toggleNode(this)">${hasChildren ? '▶' : '•'}</span>
+                <span class="caret ${hasChildren ? '' : 'empty'} ${isExpanded ? 'caret-down' : ''}" onclick="toggleNode(this, '${item.id}')">${hasChildren ? '▶' : '•'}</span>
                 <span class="node-title" onclick="editRecord('${table}', '${item.id}')" title="${displayName}">${displayName}</span>
                 ${childTable ? `<button type="button" class="add-child-btn" onclick="createNew('${childTable}', '${SCHEMA[childTable].fkName}', '${item.id}')">+ ${SCHEMA[childTable].title}</button>` : ''}
             </div>
-            ${hasChildren ? `<ul class="tree nested"></ul>` : ''}
+            ${hasChildren ? `<ul class="tree nested ${isExpanded ? 'active' : ''}"></ul>` : ''}
         `;
 
         if (hasChildren) {
@@ -220,18 +235,28 @@
         return li;
     }
 
-    function toggleNode(caretElement) {
+    function toggleNode(caretElement, id) {
         if (caretElement.classList.contains('empty')) return;
         const nestedList = caretElement.parentElement.parentElement.querySelector('.nested');
         if (nestedList) {
-            nestedList.classList.toggle('active');
+            const isActive = nestedList.classList.toggle('active');
             caretElement.classList.toggle('caret-down');
+            if (isActive) expandedNodes.add(id); else expandedNodes.delete(id);
         }
     }
 
-    // ==========================================
-    // 3. FORM AND RENDERING
-    // ==========================================
+    // 3. TABS & FORMS
+    function switchTab(tab) {
+        document.getElementById('tab-tree').classList.toggle('active', tab === 'tree');
+        document.getElementById('tab-edges').classList.toggle('active', tab === 'edges');
+        
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('form-container').style.display = 'none';
+        document.getElementById('edges-manager').style.display = tab === 'edges' ? 'block' : 'none';
+        
+        if (tab === 'tree') document.getElementById('empty-state').style.display = 'block';
+    }
+
     function generateFormFields(table) {
         const conf = SCHEMA[table];
         const container = document.getElementById('form-fields');
@@ -239,56 +264,31 @@
 
         conf.fields.forEach(f => {
             let html = `<div class="form-group"><label>${f.label}:</label>`;
-            
             if (f.type === 'text' || f.type === 'number') {
-                html += `<input type="${f.type}" id="field-${f.name}" required>`;
-            } 
-            else if (f.type === 'select') {
+                html += `<input type="${f.type}" id="field-${f.name}" ${f.name==='video_url'?'':'required'}>`;
+            } else if (f.type === 'select') {
                 html += `<select id="field-${f.name}" required><option value="">Select...</option>`;
-                DB[f.source].forEach(opt => {
-                    html += `<option value="${opt.id}">${opt.name || opt.content.substring(0,30)}</option>`;
-                });
+                DB[f.source].forEach(opt => html += `<option value="${opt.id}">${opt.name || opt.content.substring(0,30)}</option>`);
                 html += `</select>`;
-            } 
-            else if (f.type === 'enum') {
-                html += `<select id="field-${f.name}">
-                            <option value="Easy">Easy</option><option value="Medium">Medium</option>
-                            <option value="Hard">Hard</option><option value="Very Hard">Very Hard</option>
-                         </select>`;
-            } 
-            else if (f.type === 'latex' || f.type === 'latex-small') {
-                const rows = f.type === 'latex' ? 5 : 2;
-                html += `<textarea id="field-${f.name}" rows="${rows}" oninput="renderLatex('field-${f.name}', 'preview-${f.name}')"></textarea>
-                         <div id="preview-${f.name}" class="latex-preview"></div>`;
+            } else if (f.type === 'enum') {
+                html += `<select id="field-${f.name}"><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option><option value="Very Hard">Very Hard</option></select>`;
+            } else if (f.type === 'latex' || f.type === 'latex-small') {
+                html += `<textarea id="field-${f.name}" rows="${f.type === 'latex'?5:2}" oninput="renderLatex('field-${f.name}', 'preview-${f.name}')"></textarea><div id="preview-${f.name}" class="latex-preview"></div>`;
             }
-            
             html += `</div>`;
             container.innerHTML += html;
         });
     }
 
-    // UNIFIED LATEX FUNCTION
     function renderLatex(inputId, previewId) {
         const text = document.getElementById(inputId).value;
         const previewElement = document.getElementById(previewId);
-        
         previewElement.innerText = text || "Preview..."; 
-        
-        if (window.renderMathInElement) {
-            renderMathInElement(previewElement, {
-                delimiters: [
-                    {left: '$$', right: '$$', display: true},
-                    {left: '$', right: '$', display: false}
-                ],
-                throwOnError: false
-            });
-        }
+        if (window.renderMathInElement) renderMathInElement(previewElement, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false });
     }
 
-    // ==========================================
-    // 4. ACTION HANDLING
-    // ==========================================
     function showForm(table, modeText) {
+        switchTab('tree'); // Switch to main view
         document.getElementById('empty-state').style.display = 'none';
         document.getElementById('form-container').style.display = 'block';
         document.getElementById('form-header').innerText = `${modeText} (${SCHEMA[table].title})`;
@@ -300,10 +300,8 @@
     function editRecord(table, id) {
         showForm(table, "Edit");
         document.getElementById('form-id').value = id;
-        document.getElementById('delete-btn').style.display = 'block'; // Show delete button
-        
+        document.getElementById('delete-btn').style.display = 'block';
         const item = DB[table].find(x => x.id === id);
-        
         SCHEMA[table].fields.forEach(f => {
             const el = document.getElementById(`field-${f.name}`);
             if (el && item[f.name] !== undefined && item[f.name] !== null) {
@@ -317,82 +315,101 @@
         showForm(table, "Create New");
         document.getElementById('form-id').value = ''; 
         document.getElementById('dynamic-form').reset();
-        document.getElementById('delete-btn').style.display = 'none'; // Hide delete button for new records
+        document.getElementById('delete-btn').style.display = 'none';
         document.querySelectorAll('.latex-preview').forEach(p => p.innerHTML = '');
-
-        if (parentFkName && parentId) {
-            const selectEl = document.getElementById(`field-${parentFkName}`);
-            if (selectEl) selectEl.value = parentId;
-        }
+        if (parentFkName && parentId) document.getElementById(`field-${parentFkName}`).value = parentId;
     }
 
     async function saveData(event) {
         event.preventDefault();
         const statusDiv = document.getElementById('status-msg');
-        statusDiv.innerText = "Saving...";
-        statusDiv.className = 'status';
-
+        statusDiv.innerText = "Saving..."; statusDiv.className = 'status';
         const table = document.getElementById('form-table').value;
         const id = document.getElementById('form-id').value;
-        
         const payload = {};
         SCHEMA[table].fields.forEach(f => {
             const el = document.getElementById(`field-${f.name}`);
             if (el) payload[f.name] = el.value || null;
         });
-
         const path = id ? `update/${table}/${id}` : `create/${table}`;
-
         try {
-            const res = await fetch(`${API_URL}/${path}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (res.ok) {
-                statusDiv.innerText = "Success! Saved to database.";
-                statusDiv.classList.add('success');
-                await loadDatabase();
-            } else throw new Error("Database Error");
-        } catch (e) {
-            statusDiv.innerText = "A server error occurred.";
-            statusDiv.classList.add('error');
-        }
+            const res = await fetch(`${API_URL}/${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.ok) { statusDiv.innerText = "Success!"; statusDiv.classList.add('success'); await loadDatabase(); } 
+            else throw new Error();
+        } catch (e) { statusDiv.innerText = "Error saving."; statusDiv.classList.add('error'); }
     }
 
-    // DELETE FUNCTION
     async function deleteData() {
         const table = document.getElementById('form-table').value;
         const id = document.getElementById('form-id').value;
+        if (!id || !confirm(`Delete this element permanently?`)) return;
+        try {
+            const res = await fetch(`${API_URL}/delete/${table}/${id}`, { method: 'DELETE' });
+            if (res.ok) { alert("Deleted."); document.getElementById('form-container').style.display = 'none'; document.getElementById('empty-state').style.display = 'block'; await loadDatabase(); } 
+            else throw new Error();
+        } catch (e) { alert("Error deleting. Check locked relations."); }
+    }
 
-        if (!id) return;
+    // 4. TOPIC EDGES MANAGER
+    function populateEdgesDropdowns() {
+        const childSelect = document.getElementById('edge-child-select');
+        const parentSelect = document.getElementById('edge-parent-select');
+        let options = '<option value="">Select a topic...</option>';
+        DB.topics.forEach(t => options += `<option value="${t.id}">${t.name}</option>`);
         
-        // Ask for confirmation
-        if (!confirm(`WARNING!\nAre you sure you want to permanently delete this element?`)) {
+        // Preserve selection if already chosen
+        const currChild = childSelect.value;
+        childSelect.innerHTML = options;
+        parentSelect.innerHTML = options;
+        if(currChild) { childSelect.value = currChild; loadTopicEdges(); }
+    }
+
+    function loadTopicEdges() {
+        const childId = document.getElementById('edge-child-select').value;
+        const listDiv = document.getElementById('current-edges-list');
+        listDiv.innerHTML = '<label>Current Prerequisites for this Topic:</label>';
+        
+        if (!childId) return;
+
+        const parents = DB.topic_edges.filter(edge => edge.child_id === childId);
+        if(parents.length === 0) {
+            listDiv.innerHTML += '<p style="color:#7f8c8d; font-size:13px;">No prerequisites. This topic can be started immediately.</p>';
             return;
         }
 
-        try {
-            const res = await fetch(`${API_URL}/delete/${table}/${id}`, { 
-                method: 'DELETE' 
-            });
-
-            if (res.ok) {
-                alert("Element successfully deleted.");
-                // After deletion, hide the form and return to the empty state
-                document.getElementById('form-container').style.display = 'none';
-                document.getElementById('empty-state').style.display = 'block';
-                await loadDatabase(); // Reload tree without the deleted node
-            } else {
-                throw new Error("Database Error");
-            }
-        } catch (e) {
-            alert("Error during deletion! Check if the element has locked relations.");
-        }
+        parents.forEach(edge => {
+            const parentTopic = DB.topics.find(t => t.id === edge.parent_id);
+            listDiv.innerHTML += `
+                <div class="edge-item">
+                    <span>${parentTopic ? parentTopic.name : 'Unknown'}</span>
+                    <button class="btn-sm-del" onclick="removeEdge('${edge.parent_id}', '${edge.child_id}')">Remove</button>
+                </div>
+            `;
+        });
     }
 
-    // Start application
+    async function addEdge() {
+        const childId = document.getElementById('edge-child-select').value;
+        const parentId = document.getElementById('edge-parent-select').value;
+        if (!childId || !parentId || childId === parentId) return alert("Select valid and different topics.");
+
+        try {
+            const res = await fetch(`${API_URL}/create/topic_edges`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ parent_id: parentId, child_id: childId })
+            });
+            if (res.ok) await loadDatabase(); else throw new Error();
+        } catch (e) { alert("Error creating relation."); }
+    }
+
+    async function removeEdge(parentId, childId) {
+        try {
+            // Requires a custom endpoint in Python for composite keys, e.g. /delete_edge/<parent>/<child>
+            const res = await fetch(`${API_URL}/delete_edge/${parentId}/${childId}`, { method: 'DELETE' });
+            if (res.ok) await loadDatabase(); else throw new Error();
+        } catch (e) { alert("Error removing relation."); }
+    }
+
     loadDatabase();
 </script>
 

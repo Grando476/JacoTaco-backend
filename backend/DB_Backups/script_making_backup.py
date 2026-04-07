@@ -42,7 +42,7 @@ def create_dynamic_backup():
             print(f"    Error downloading {table}: {e}")
 
     date_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    file_name = f"backup_matgraph_dynamic_{date_str}.json"
+    file_name = f"backup_matgraph_db_{date_str}.json"
     
     with open(file_name, "w", encoding="utf-8") as file:
         json.dump(backup_data, file, ensure_ascii=False, indent=4)
