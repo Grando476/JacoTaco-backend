@@ -1,0 +1,317 @@
+{
+    "chapters": [
+        {
+            "id": "553b6ecc-c95e-47a1-bbf7-5330e0d15e4c",
+            "name": "Potęgi i pierwiastki",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        }
+    ],
+    "topics": [
+        {
+            "id": "49166e5c-12cc-4ef4-a8d2-f2fcd5dabe18",
+            "chapter_id": "553b6ecc-c95e-47a1-bbf7-5330e0d15e4c",
+            "name": "Potęgi o wykładniku całkowitym",
+            "video_url": "https://example.com/wideo/potegi-calkowite",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "9e77d9c2-c07f-4ccc-9b3f-68394f5f165c",
+            "chapter_id": "553b6ecc-c95e-47a1-bbf7-5330e0d15e4c",
+            "name": "Pierwiastki",
+            "video_url": "https://example.com/wideo/pierwiastki",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "9696e4c2-e217-4a9a-b587-dfef1e7ef8db",
+            "chapter_id": "553b6ecc-c95e-47a1-bbf7-5330e0d15e4c",
+            "name": "Potęgi o wykładniku nie-całkowitym",
+            "video_url": "https://example.com/wideo/potegi-niecalkowite",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        }
+    ],
+    "topic_edges": [
+        {
+            "parent_id": "49166e5c-12cc-4ef4-a8d2-f2fcd5dabe18",
+            "child_id": "9e77d9c2-c07f-4ccc-9b3f-68394f5f165c"
+        },
+        {
+            "parent_id": "9e77d9c2-c07f-4ccc-9b3f-68394f5f165c",
+            "child_id": "9696e4c2-e217-4a9a-b587-dfef1e7ef8db"
+        }
+    ],
+    "subtopics": [
+        {
+            "id": "e918c2e4-094e-4d9a-a463-4af64e5b690c",
+            "topic_id": "49166e5c-12cc-4ef4-a8d2-f2fcd5dabe18",
+            "name": "Definicja potęgi o wykładniku naturalnym",
+            "importance": 5,
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "c7061f9e-d0cf-4607-bb3f-a4f5bb092dd9",
+            "topic_id": "49166e5c-12cc-4ef4-a8d2-f2fcd5dabe18",
+            "name": "Wzory na Potęgach, mnożenie, dzielenie, potęgowanie, wykładnik ujemny",
+            "importance": 5,
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "6285bafa-4584-43d7-9157-4a8233615f0e",
+            "topic_id": "49166e5c-12cc-4ef4-a8d2-f2fcd5dabe18",
+            "name": "Notacja wykładnicza",
+            "importance": 2,
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "c6022266-f33c-4c2c-bfd5-15d1eefa80d6",
+            "topic_id": "49166e5c-12cc-4ef4-a8d2-f2fcd5dabe18",
+            "name": "Lokaty",
+            "importance": 3,
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "8af623c5-e045-45ac-aa10-120ef2444fb1",
+            "topic_id": "9e77d9c2-c07f-4ccc-9b3f-68394f5f165c",
+            "name": "Pierwiastki stopnia parzystego",
+            "importance": 5,
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "a913fbfe-b82d-4a2c-91de-eab4f7a27221",
+            "topic_id": "9e77d9c2-c07f-4ccc-9b3f-68394f5f165c",
+            "name": "Pierwiastki stopnia nieparzystego",
+            "importance": 5,
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "2c7606e0-6bbf-4cc6-b188-7e15093a7248",
+            "topic_id": "9e77d9c2-c07f-4ccc-9b3f-68394f5f165c",
+            "name": "Wzory na pierwiastkach, mnożenie, dzielenie, potęgowanie",
+            "importance": 5,
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "9b1340ab-70a6-4461-b1b7-2fe7799c0129",
+            "topic_id": "9e77d9c2-c07f-4ccc-9b3f-68394f5f165c",
+            "name": "Wyciąganie niewymierności",
+            "importance": 3,
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "7b0b7347-ff7f-4716-8d03-0a57b5be022b",
+            "topic_id": "9696e4c2-e217-4a9a-b587-dfef1e7ef8db",
+            "name": "Zamiana Pierwiastków na potęgi",
+            "importance": 3,
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "747a67dc-7e5a-486b-9d51-ddb9b1c98e84",
+            "topic_id": "9696e4c2-e217-4a9a-b587-dfef1e7ef8db",
+            "name": "Potęgi o wykładniku wymiernym",
+            "importance": 3,
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "b51e3f9d-be44-4479-814a-a7adea579a4a",
+            "topic_id": "9696e4c2-e217-4a9a-b587-dfef1e7ef8db",
+            "name": "Potęgi o wykładniku rzeczywistym",
+            "importance": 3,
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        }
+    ],
+    "task_groups": [
+        {
+            "id": "16f79964-6839-4ce6-bab6-4024d387c639",
+            "subtopic_id": "e918c2e4-094e-4d9a-a463-4af64e5b690c",
+            "name": "Liczenie potęg o podstawie całkowitej i zerowej",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "acb04f04-1daf-4c4e-8902-31fe29d30309",
+            "subtopic_id": "e918c2e4-094e-4d9a-a463-4af64e5b690c",
+            "name": "Liczenie potęg o podstawie wymiernej",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "0cae1b24-7a82-4b72-9819-9d26fc131908",
+            "subtopic_id": "e918c2e4-094e-4d9a-a463-4af64e5b690c",
+            "name": "Liczenie potęg o podstawie ujemnej i wymiernej",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "b6b98699-d59d-4ed4-9e0b-1b5a41335cda",
+            "subtopic_id": "c7061f9e-d0cf-4607-bb3f-a4f5bb092dd9",
+            "name": "Mnożenie/Dzielenie potęg o tych samych podstawach",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "33376405-f4ae-40bf-ba0b-7a97dc47834f",
+            "subtopic_id": "c7061f9e-d0cf-4607-bb3f-a4f5bb092dd9",
+            "name": "Wychodzenie z nawiasu do potęgi w którym był iloczyn/iloraz",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "eca28368-b657-4e34-a18c-67d8e8e9d171",
+            "subtopic_id": "c7061f9e-d0cf-4607-bb3f-a4f5bb092dd9",
+            "name": "Obliczanie Potęgi podniesionej do potęgi",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "e0b1b974-dda8-41f6-be90-2ed76fd306b9",
+            "subtopic_id": "c7061f9e-d0cf-4607-bb3f-a4f5bb092dd9",
+            "name": "Sprowadzanie liczb do wspólnej podstawy potęgi",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "cc5afd62-08dd-403f-9d51-b5d756ab5ef2",
+            "subtopic_id": "c7061f9e-d0cf-4607-bb3f-a4f5bb092dd9",
+            "name": "obliczanie potęg z liczb ujemnych i obliczanie ujemnych potęg",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "84ae726e-9cdb-42c4-a224-5ec6de97ae52",
+            "subtopic_id": "c7061f9e-d0cf-4607-bb3f-a4f5bb092dd9",
+            "name": "Zadania złożone z powyższych elementów",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "64b022b7-f13f-4231-866c-b50b01fb5673",
+            "subtopic_id": "6285bafa-4584-43d7-9157-4a8233615f0e",
+            "name": "Przekształcanie do notacji wykładniczej",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "f2599879-bbb2-450c-89b4-e4da18b16b29",
+            "subtopic_id": "6285bafa-4584-43d7-9157-4a8233615f0e",
+            "name": "Przekształcanie z notacji wykładniczej",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "8fb45106-eaa1-4dda-9af6-d4d76be020b6",
+            "subtopic_id": "6285bafa-4584-43d7-9157-4a8233615f0e",
+            "name": "Dodawanie, Odejmowanie notacji wykładniczej",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "8ab5d2d5-263b-49b4-90d3-0c9b0730df79",
+            "subtopic_id": "6285bafa-4584-43d7-9157-4a8233615f0e",
+            "name": "Mnożenie, dzielenie notacji wykładniczej",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "10902484-3a70-4fa1-b9f1-86b06cf8c4f4",
+            "subtopic_id": "6285bafa-4584-43d7-9157-4a8233615f0e",
+            "name": "Potęgowanie notacji wykładniczej",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "9871f0bd-0a5b-4cdc-a7a6-c61f8754e55c",
+            "subtopic_id": "c6022266-f33c-4c2c-bfd5-15d1eefa80d6",
+            "name": "Obliczanie odsetek",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "ed01c531-bf60-4fc9-9c68-d30295b77477",
+            "subtopic_id": "c6022266-f33c-4c2c-bfd5-15d1eefa80d6",
+            "name": "Obliczanie kapitału po x latach przy y oprocentowaniu",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "abc4c323-34ab-4aa3-8e3f-55940b7ba73f",
+            "subtopic_id": "c6022266-f33c-4c2c-bfd5-15d1eefa80d6",
+            "name": "Obliczanie jakie oprocentowanie jest korzystniejszy",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        }
+    ],
+    "tasks": [
+        {
+            "id": "d8a89afe-8d2a-41d1-8fa5-57018a4dad89",
+            "task_group_id": "16f79964-6839-4ce6-bab6-4024d387c639",
+            "content": "Oblicz: $$ 2^5 $$",
+            "difficulty_level": "Easy",
+            "correct_answer": "32",
+            "video_url": "https://example.com/zad/1",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "81b31896-a43e-4449-8ef4-3dddf6e7a7af",
+            "task_group_id": "16f79964-6839-4ce6-bab6-4024d387c639",
+            "content": "Oblicz: $$ (-3)^4 $$",
+            "difficulty_level": "Easy",
+            "correct_answer": "81",
+            "video_url": "https://example.com/zad/2",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "57a8096d-0454-48cc-a32a-e7b58619c57d",
+            "task_group_id": "acb04f04-1daf-4c4e-8902-31fe29d30309",
+            "content": "Oblicz: $$ \\left(\\frac{2}{3}\\right)^3 $$",
+            "difficulty_level": "Easy",
+            "correct_answer": "\\frac{8}{27}",
+            "video_url": "https://example.com/zad/6",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "326c30b0-eb2e-4e3d-bbba-d881c2273abc",
+            "task_group_id": "b6b98699-d59d-4ed4-9e0b-1b5a41335cda",
+            "content": "Oblicz: $$ 3^2 \\cdot 3^4 $$",
+            "difficulty_level": "Easy",
+            "correct_answer": "3^6",
+            "video_url": "https://example.com/zad/m1",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "6109d3df-74af-4f76-8550-3c8032f1e402",
+            "task_group_id": "eca28368-b657-4e34-a18c-67d8e8e9d171",
+            "content": "Oblicz: $$ (10^2)^3 $$",
+            "difficulty_level": "Easy",
+            "correct_answer": "1000000",
+            "video_url": "https://example.com/zad/p5",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "33bdea8e-e0ee-46c8-9d6b-ca91051b6113",
+            "task_group_id": "cc5afd62-08dd-403f-9d51-b5d756ab5ef2",
+            "content": "Oblicz: $$ 5^{-1} $$",
+            "difficulty_level": "Easy",
+            "correct_answer": "\\frac{1}{5}",
+            "video_url": "https://example.com/zad/u1",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "99da8624-a3a2-40b7-b45f-907e1f98937a",
+            "task_group_id": "64b022b7-f13f-4231-866c-b50b01fb5673",
+            "content": "Zapisz w notacji: $$ 50000 $$",
+            "difficulty_level": "Easy",
+            "correct_answer": "5 \\cdot 10^4",
+            "video_url": "https://example.com/zad/nw1",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "ddb65698-8249-4e46-b9b9-db07c9b0191e",
+            "task_group_id": "8ab5d2d5-263b-49b4-90d3-0c9b0730df79",
+            "content": "Oblicz: $$ (2 \\cdot 10^3) \\cdot (4 \\cdot 10^2) $$",
+            "difficulty_level": "Easy",
+            "correct_answer": "8 \\cdot 10^5",
+            "video_url": "https://example.com/zad/md1",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "bea86348-fba8-4f54-b859-295cc1a27d7f",
+            "task_group_id": "9871f0bd-0a5b-4cdc-a7a6-c61f8754e55c",
+            "content": "Oblicz odsetki od $$ 1000 \\text{ zł} $$ przy $$ 5\\% $$ rocznie.",
+            "difficulty_level": "Easy",
+            "correct_answer": "50 \\text{ zł}",
+            "video_url": "https://example.com/zad/lo1",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        },
+        {
+            "id": "bd2abd95-ff62-4fe3-8485-5514e38debb4",
+            "task_group_id": "ed01c531-bf60-4fc9-9c68-d30295b77477",
+            "content": "Kapitał po $$ 2 $$ latach z $$ 1000 \\text{ zł} $$ przy $$ 10\\% $$ złożonym.",
+            "difficulty_level": "Easy",
+            "correct_answer": "1210 \\text{ zł}",
+            "video_url": "https://example.com/zad/cap1",
+            "created_at": "2026-04-06T19:11:04.904268+00:00"
+        }
+    ]
+}

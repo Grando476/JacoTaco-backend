@@ -59,3 +59,15 @@ CREATE INDEX IF NOT EXISTS idx_topics_chapter ON public.topics(chapter_id);
 CREATE INDEX IF NOT EXISTS idx_subtopics_topic ON public.subtopics(topic_id);
 CREATE INDEX IF NOT EXISTS idx_task_groups_subtopic ON public.task_groups(subtopic_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_group ON public.tasks(task_group_id);
+
+
+--  TWORZENIE FUNKCJI SYSTEMOWYCH I POMOCNICZYCH
+CREATE OR REPLACE FUNCTION get_public_tables()
+RETURNS TABLE(table_name text)
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT table_name::text 
+  FROM information_schema.tables 
+  WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
+$$;
