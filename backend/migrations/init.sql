@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS public.topics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     chapter_id UUID NOT NULL REFERENCES public.chapters(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    video_url TEXT, -- Link do materiału wideo dla całego tematu
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -26,16 +25,18 @@ CREATE TABLE IF NOT EXISTS public.topic_edges (
 CREATE INDEX IF NOT EXISTS idx_topic_edges_parent ON public.topic_edges(parent_id);
 CREATE INDEX IF NOT EXISTS idx_topic_edges_child ON public.topic_edges(child_id);
 
--- 3. Subtematy
+-- 3. Subtematy (ZMODYFIKOWANE)
 CREATE TABLE IF NOT EXISTS public.subtopics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     topic_id UUID NOT NULL REFERENCES public.topics(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     importance SMALLINT CHECK (importance >= 1 AND importance <= 5) NOT NULL,
+    sort_order INTEGER DEFAULT 0 NOT NULL, -- NOWE: Kolejność przerabiania
+    video_url TEXT,                        -- NOWE: Link do wideo
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 4. Grupy Zadań (Rodzaj taska z klucza w JSON)
+-- 4. Grupy Zadań
 CREATE TABLE IF NOT EXISTS public.task_groups (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     subtopic_id UUID NOT NULL REFERENCES public.subtopics(id) ON DELETE CASCADE,
@@ -43,12 +44,12 @@ CREATE TABLE IF NOT EXISTS public.task_groups (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 5. Zadania (Faktyczne zadania na liście)
+-- 5. Zadania
 CREATE TABLE IF NOT EXISTS public.tasks (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     task_group_id UUID NOT NULL REFERENCES public.task_groups(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
-    difficulty_level task_difficulty DEFAULT 'Easy' NOT NULL, -- Tutaj używasz typu
+    difficulty_level task_difficulty DEFAULT 'Easy' NOT NULL,
     correct_answer TEXT, 
     video_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -59,3 +60,14 @@ CREATE INDEX IF NOT EXISTS idx_topics_chapter ON public.topics(chapter_id);
 CREATE INDEX IF NOT EXISTS idx_subtopics_topic ON public.subtopics(topic_id);
 CREATE INDEX IF NOT EXISTS idx_task_groups_subtopic ON public.task_groups(subtopic_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_group ON public.tasks(task_group_id);
+
+-- TWORZENIE FUNKCJI SYSTEMOWYCH I POMOCNICZYCH
+CREATE OR REPLACE FUNCTION get_public_tables()
+RETURNS TABLE(table_name text)
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT table_name::text 
+  FROM information_schema.tables 
+  WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
+$$;
