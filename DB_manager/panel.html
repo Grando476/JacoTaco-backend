@@ -171,7 +171,11 @@
         },
         topics: {
             title: "Topic", childTable: "subtopics", fkName: "chapter_id", parentTable: "chapters",
-            fields: [{ name: 'chapter_id', label: 'Assigned Chapter', type: 'select', source: 'chapters' }, { name: 'name', label: 'Topic Name', type: 'text' }]
+            fields: [
+                { name: 'chapter_id', label: 'Assigned Chapter', type: 'select', source: 'chapters' }, 
+                { name: 'name', label: 'Topic Name', type: 'text' },
+                { name: 'content_tex', label: 'Theory Content (LaTeX)', type: 'latex' } // NOWE
+            ]
         },
         subtopics: {
             title: "Subtopic", childTable: "task_groups", fkName: "topic_id", parentTable: "topics",
@@ -180,7 +184,8 @@
                 { name: 'name', label: 'Subtopic Name', type: 'text' }, 
                 { name: 'importance', label: 'Importance (1-5)', type: 'number' },
                 { name: 'sort_order', label: 'Sort Order (Position)', type: 'number' },
-                { name: 'video_url', label: 'Video URL (optional)', type: 'text' }
+                { name: 'video_url', label: 'Video URL (optional)', type: 'text' },
+                { name: 'content_tex', label: 'Theory Content (LaTeX)', type: 'latex' } // NOWE
             ]
         },
         task_groups: {

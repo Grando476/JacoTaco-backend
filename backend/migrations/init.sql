@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS public.topics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     chapter_id UUID NOT NULL REFERENCES public.chapters(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
+    content_tex TEXT DEFAULT '', -- NOWE POLA
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -31,8 +32,9 @@ CREATE TABLE IF NOT EXISTS public.subtopics (
     topic_id UUID NOT NULL REFERENCES public.topics(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     importance SMALLINT CHECK (importance >= 1 AND importance <= 5) NOT NULL,
-    sort_order INTEGER DEFAULT 0 NOT NULL, -- NOWE: Kolejność przerabiania
-    video_url TEXT,                        -- NOWE: Link do wideo
+    sort_order INTEGER DEFAULT 0 NOT NULL,
+    video_url TEXT,
+    content_tex TEXT DEFAULT '', -- NOWE POLA
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

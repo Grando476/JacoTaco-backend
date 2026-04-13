@@ -1,0 +1,68 @@
+import os
+from dotenv import load_dotenv
+from supabase import create_client, Client
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import JsonOutputParser
+
+load_dotenv()
+
+supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+
+llm = ChatGoogleGenerativeAI(
+    model="gemini-3.1-flash-lite-preview", 
+    google_api_key=os.getenv("GOOGLE_API_KEY"),
+    temperature=0.7
+)
+
+def generate_tasks():
+    try:
+        print("Sprawdzam bazę danych...")
+        existing_tasks = supabase.table("tasks").select("task_group_id").execute().data
+        used_ids = {t['task_group_id'] for t in existing_tasks}
+
+        all_groups = supabase.table("task_groups").select("id").execute().data
+        available_groups = [g for g in all_groups if g['id'] not in used_ids]
+
+        if not available_groups:
+            print("Wszystkie grupy mają już zadania!")
+            return
+
+        target_group_id = available_groups[0]['id']
+
+        res = supabase.table("task_groups").select(
+            "name, subtopics(name, topics(name, chapters(name)))"
+        ).eq("id", target_group_id).single().execute()
+        
+        d = res.data
+        context = {
+            "chapter": d['subtopics']['topics']['chapters']['name'],
+            "topic": d['subtopics']['topics']['name'],
+            "subtopic": d['subtopics']['name'],
+            "group": d['name']
+        }
+
+        print(f"Generowanie dla: {context['group']}...")
+
+        prompt = ChatPromptTemplate.from_template("""
+        Jesteś generatorem zadań. Stwórz 4 zadania (Easy, Medium, Hard, Very Hard) dla:
+        Struktura: {chapter} > {topic} > {subtopic} > {group}
+
+        Zwróć TYLKO czysty JSON jako listę obiektów z polami: 
+        content, difficulty_level, correct_answer.
+        """)
+
+        chain = prompt | llm | JsonOutputParser()
+        generated_tasks = chain.invoke(context)
+
+        for task in generated_tasks:
+            task["task_group_id"] = target_group_id
+
+        supabase.table("tasks").insert(generated_tasks).execute()
+        print("Zakończono sukcesem! Zapisano do bazy.")
+
+    except Exception as e:
+        print(f"Błąd: {e}")
+
+if __name__ == '__main__':
+    generate_tasks()
