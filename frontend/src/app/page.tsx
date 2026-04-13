@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ReactFlow, Background, Controls, Node, Edge, useNodesState, useEdgesState, Position, Handle } from "@xyflow/react";
+import { ReactFlow, Background, Controls, Node, Edge, useNodesState, useEdgesState, Position, Handle, BackgroundVariant } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import dagre from "dagre";
 // import { useRouter } from "next/navigation";
@@ -184,7 +184,7 @@ export default function Home() {
                 fitView
                 proOptions={{ hideAttribution: true }}
               >
-                <Background color="#1f1f22" gap={25} size={2} variant="dots" />
+                <Background color="#1f1f22" gap={25} size={2} variant={BackgroundVariant.Dots} />
                 <Controls style={{ filter: 'invert(80%) sepia(90%) saturate(400%) hue-rotate(360deg)' }} />
               </ReactFlow>
           )}
