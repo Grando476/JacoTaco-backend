@@ -69,7 +69,7 @@ const CyberNode = ({ data, selected }: any) => {
              fontSize: '0.7rem', background: color, color: '#0a0a0c', 
              padding: '2px 8px', marginTop: '8px', borderRadius: '2px', fontWeight: 'bold'
          }}>
-            3/3
+            {data.subtasksCount ? `${data.subtasksCount}/${data.subtasksCount}` : '0/0'}
          </span>
       </div>
       
@@ -104,7 +104,7 @@ export default function Home() {
               id: n.id,
               type: 'cyber',
               position: { x: 0, y: 0 },
-              data: { label: n.name },
+              data: { label: n.name, subtasksCount: n.subtasks_count },
           }));
           
           const rawEdges: Edge[] = data.edges.map((e: any, idx: number) => ({

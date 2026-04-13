@@ -44,7 +44,12 @@ async def get_nodes():
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
         # Fetch nodes (topics)
-        cur.execute("SELECT id, name FROM public.topics;")
+        cur.execute("""
+            SELECT t.id, t.name, COUNT(s.id) as subtasks_count
+            FROM public.topics t
+            LEFT JOIN public.subtopics s ON t.id = s.topic_id
+            GROUP BY t.id, t.name;
+        """)
         nodes = cur.fetchall()
         
         # Fetch edges (topic_edges)
