@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS public.topics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     chapter_id UUID NOT NULL REFERENCES public.chapters(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
+    ui_x INTEGER DEFAULT 0 NOT NULL,
+    ui_y INTEGER DEFAULT 0 NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

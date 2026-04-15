@@ -3,53 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { ReactFlow, Background, Controls, Node, Edge, useNodesState, useEdgesState, Position, Handle, BackgroundVariant } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import ELK from "elkjs/lib/elk.bundled.js";
-// import { useRouter } from "next/navigation";
-
-const elk = new ELK();
-
-const getLayoutedElements = async (nodes: Node[], edges: Edge[], direction = 'UP') => {
-  const graph = {
-    id: "root",
-    layoutOptions: {
-      'elk.algorithm': 'layered',
-      'elk.direction': direction,
-      'elk.layered.spacing.nodeNodeBetweenLayers': '100',
-      'elk.spacing.nodeNode': '100',
-    },
-    children: nodes.map((node) => ({
-      ...node,
-      width: 140,
-      height: 140,
-    })),
-    edges: edges.map((edge) => ({
-      id: edge.id,
-      sources: [edge.source],
-      targets: [edge.target],
-    })),
-  };
-
-  const layoutedGraph = await elk.layout(graph);
-  
-  if (!layoutedGraph.children) {
-      return { nodes, edges };
-  }
-
-  const layoutedNodes = nodes.map((node) => {
-    const layoutNode = layoutedGraph.children!.find((n) => n.id === node.id);
-    return {
-      ...node,
-      targetPosition: Position.Bottom,
-      sourcePosition: Position.Top,
-      position: {
-        x: layoutNode?.x || 0,
-        y: layoutNode?.y || 0,
-      },
-    };
-  });
-
-  return { nodes: layoutedNodes, edges };
-};
 
 const CyberNode = ({ data, selected }: any) => {
   const color = selected ? '#fcee0a' : '#0ea5e9';
@@ -99,6 +52,7 @@ export default function Home() {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [loading, setLoading] = useState(true);
+  const [savingLayout, setSavingLayout] = useState(false);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [sidebarLessons, setSidebarLessons] = useState<any[]>([]);
   const [loadingLessons, setLoadingLessons] = useState(false);
@@ -115,7 +69,9 @@ export default function Home() {
           const rawNodes: Node[] = data.nodes.map((n: any) => ({
               id: n.id,
               type: 'cyber',
-              position: { x: 0, y: 0 },
+              targetPosition: Position.Bottom,
+              sourcePosition: Position.Top,
+              position: { x: n.ui_x || 0, y: n.ui_y || 0 },
               data: { label: n.name, subtasksCount: n.subtasks_count },
           }));
           
@@ -131,15 +87,9 @@ export default function Home() {
                 filter: 'drop-shadow(0 0 5px rgba(14, 165, 233, 0.6))'
               }
           }));
-          
-          const { nodes: layoutedNodes, edges: layoutedEdges } = await getLayoutedElements(
-            rawNodes,
-            rawEdges,
-            'UP'
-          );
 
-          setNodes(layoutedNodes);
-          setEdges(layoutedEdges);
+          setNodes(rawNodes);
+          setEdges(rawEdges);
         }
       } catch (err) {
         console.error("Error fetching nodes:", err);
@@ -170,6 +120,33 @@ export default function Home() {
       }
   }, []);
 
+  const saveLayout = async () => {
+    setSavingLayout(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const positions = nodes.map((n) => ({
+        id: n.id,
+        x: Math.round(n.position.x),
+        y: Math.round(n.position.y),
+      }));
+      
+      const res = await fetch(`${apiUrl}/api/v1/nodes/positions`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ positions }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to save positions");
+      }
+      alert("Layout saved successfully!");
+    } catch (err) {
+      console.error("Error saving layout:", err);
+      alert("Failed to save layout.");
+    } finally {
+      setSavingLayout(false);
+    }
+  };
+
   return (
     <div style={{ width: '100vw', height: '100vh', background: '#0a0a0c', display: 'flex' }}>
       <div style={{ flex: 1, position: 'relative' }}>
@@ -178,6 +155,20 @@ export default function Home() {
                   <p className="text-2xl font-semibold text-[#fcee0a] animate-pulse">Initializing Cyber-Tree...</p>
               </div>
           ) : (
+              <>
+              <button 
+                  onClick={saveLayout}
+                  disabled={savingLayout}
+                  style={{
+                      position: 'absolute', top: 20, right: 20, zIndex: 100,
+                      padding: '10px 20px', background: savingLayout ? '#64748b' : '#0ea5e9',
+                      color: 'white', border: 'none', borderRadius: '5px',
+                      fontWeight: 'bold', cursor: savingLayout ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 0 15px rgba(14, 165, 233, 0.4)', transition: 'background 0.2s'
+                  }}
+              >
+                  {savingLayout ? 'Saving...' : 'Save Layout'}
+              </button>
               <ReactFlow 
                 nodes={nodes} 
                 edges={edges} 
@@ -185,7 +176,7 @@ export default function Home() {
                 onEdgesChange={onEdgesChange}
                 onNodeClick={onNodeClick}
                 nodeTypes={nodeTypes}
-                nodesDraggable={false}
+                nodesDraggable={true}
                 nodesConnectable={false}
                 elementsSelectable={true}
                 panOnDrag={true}
@@ -199,6 +190,7 @@ export default function Home() {
                 <Background color="#1f1f22" gap={25} size={2} variant={BackgroundVariant.Dots} />
                 <Controls style={{ filter: 'invert(80%) sepia(90%) saturate(400%) hue-rotate(360deg)' }} />
               </ReactFlow>
+              </>
           )}
       </div>
       
