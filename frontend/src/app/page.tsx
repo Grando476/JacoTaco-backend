@@ -3,40 +3,52 @@
 import { useEffect, useState, useCallback } from "react";
 import { ReactFlow, Background, Controls, Node, Edge, useNodesState, useEdgesState, Position, Handle, BackgroundVariant } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import dagre from "dagre";
+import ELK from "elkjs/lib/elk.bundled.js";
 // import { useRouter } from "next/navigation";
 
-const dagreGraph = new dagre.graphlib.Graph();
-dagreGraph.setDefaultEdgeLabel(() => ({}));
+const elk = new ELK();
 
-const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
-  const isHorizontal = direction === 'LR';
-  dagreGraph.setGraph({ rankdir: direction });
+const getLayoutedElements = async (nodes: Node[], edges: Edge[], direction = 'UP') => {
+  const graph = {
+    id: "root",
+    layoutOptions: {
+      'elk.algorithm': 'layered',
+      'elk.direction': direction,
+      'elk.layered.spacing.nodeNodeBetweenLayers': '100',
+      'elk.spacing.nodeNode': '100',
+    },
+    children: nodes.map((node) => ({
+      ...node,
+      width: 140,
+      height: 140,
+    })),
+    edges: edges.map((edge) => ({
+      id: edge.id,
+      sources: [edge.source],
+      targets: [edge.target],
+    })),
+  };
 
-  nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: 140, height: 140 });
-  });
+  const layoutedGraph = await elk.layout(graph);
+  
+  if (!layoutedGraph.children) {
+      return { nodes, edges };
+  }
 
-  edges.forEach((edge) => {
-    dagreGraph.setEdge(edge.source, edge.target);
-  });
-
-  dagre.layout(dagreGraph);
-
-  nodes.forEach((node) => {
-    const nodeWithPosition = dagreGraph.node(node.id);
-    node.targetPosition = isHorizontal ? Position.Left : Position.Top;
-    node.sourcePosition = isHorizontal ? Position.Right : Position.Bottom;
-
-    node.position = {
-      x: nodeWithPosition.x - 140 / 2,
-      y: nodeWithPosition.y - 140 / 2,
+  const layoutedNodes = nodes.map((node) => {
+    const layoutNode = layoutedGraph.children!.find((n) => n.id === node.id);
+    return {
+      ...node,
+      targetPosition: Position.Bottom,
+      sourcePosition: Position.Top,
+      position: {
+        x: layoutNode?.x || 0,
+        y: layoutNode?.y || 0,
+      },
     };
-
-    return node;
   });
 
-  return { nodes, edges };
+  return { nodes: layoutedNodes, edges };
 };
 
 const CyberNode = ({ data, selected }: any) => {
@@ -54,7 +66,7 @@ const CyberNode = ({ data, selected }: any) => {
             fill="rgba(255, 255, 255, 0.03)" stroke={color} strokeWidth="1" opacity="0.5" />
       </svg>
       
-      <Handle type="target" position={Position.Top} style={{ background: 'transparent', border: 'none' }} />
+      <Handle type="target" position={Position.Bottom} style={{ background: 'transparent', border: 'none' }} />
       
       <div style={{ 
           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
@@ -73,7 +85,7 @@ const CyberNode = ({ data, selected }: any) => {
          </span>
       </div>
       
-      <Handle type="source" position={Position.Bottom} style={{ background: 'transparent', border: 'none' }} />
+      <Handle type="source" position={Position.Top} style={{ background: 'transparent', border: 'none' }} />
     </div>
   );
 };
@@ -120,10 +132,10 @@ export default function Home() {
               }
           }));
           
-          const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+          const { nodes: layoutedNodes, edges: layoutedEdges } = await getLayoutedElements(
             rawNodes,
             rawEdges,
-            'TB'
+            'UP'
           );
 
           setNodes(layoutedNodes);
