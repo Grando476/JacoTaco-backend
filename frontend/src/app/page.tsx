@@ -136,12 +136,25 @@ export default function Home() {
         body: JSON.stringify({ positions }),
       });
       if (!res.ok) {
-        throw new Error("Failed to save positions");
+        let msg = `HTTP Error ${res.status}: ${res.statusText}`;
+        try {
+          const errData = await res.json();
+          msg += ` - ${errData.detail || errData.error || JSON.stringify(errData)}`;
+        } catch {
+          msg += ` - ${await res.text()}`;
+        }
+        throw new Error(msg);
       }
+      
+      const data = await res.json();
+      if (data.error) {
+         throw new Error(`Database Error: ${data.error}`);
+      }
+      
       alert("Layout saved successfully!");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error saving layout:", err);
-      alert("Failed to save layout.");
+      alert(`Failed to save layout.\n\nDetails: ${err.message}`);
     } finally {
       setSavingLayout(false);
     }
