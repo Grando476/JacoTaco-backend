@@ -19,8 +19,10 @@
         .sidebar-header { background: #2c3e50; color: white; padding: 15px 20px; display: flex; flex-direction: column; gap: 10px; position: relative; }
         .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .sidebar-header h2 { margin: 0; font-size: 18px; }
-        .header-buttons { display: flex; gap: 10px; width: 100%; }
-        .header-buttons button { flex: 1; background: #34495e; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        
+        /* Zmienione lekko by pomieścić 3 przyciski */
+        .header-buttons { display: flex; gap: 5px; width: 100%; flex-wrap: wrap; }
+        .header-buttons button { flex: 1; min-width: 30%; background: #34495e; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
         .header-buttons button:hover { background: #465c71; }
         .header-buttons button.active { background: #3498db; }
         
@@ -77,6 +79,11 @@
         .edge-list { margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
         .edge-item { display: flex; justify-content: space-between; background: #f8f9fa; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px; }
         .btn-sm-del { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
+
+        /* IMPORT STYLES */
+        .import-layout { display: flex; gap: 20px; align-items: flex-start; }
+        .schema-preview-box { flex: 1; background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto; max-height: 700px; overflow-y: auto; }
+        .import-input-box { flex: 2; display: flex; flex-direction: column; gap: 10px; }
     </style>
 </head>
 <body>
@@ -94,6 +101,7 @@
         <div class="header-buttons">
             <button id="tab-tree" class="active" onclick="switchTab('tree')">📂 Tree View</button>
             <button id="tab-edges" onclick="switchTab('edges')">🔗 Topic Relations</button>
+            <button id="tab-import" onclick="switchTab('import')">📥 Bulk Import</button>
         </div>
     </div>
     <div class="sidebar-content" id="tree-container">Loading tree...</div>
@@ -142,6 +150,20 @@
             <label>Current Prerequisites for this Topic:</label>
         </div>
     </div>
+
+    <div class="form-card" id="import-view" style="display: none; max-width: 1200px; width: 100%;">
+        <h2 class="form-title">Bulk JSON Import</h2>
+        <p>Paste a hierarchical JSON representing full modules. The script will sequentially create records and link Foreign Keys automatically.</p>
+        
+        <div class="import-layout">
+            <div class="schema-preview-box" id="schema-preview">Loading expected format...</div>
+            <div class="import-input-box">
+                <textarea id="import-json" rows="30" placeholder='{&#10;  "chapters": [&#10;    {&#10;      "name": "My Chapter",&#10;      "topics": [...]&#10;    }&#10;  ]&#10;}'></textarea>
+                <button type="button" onclick="executeImport()" class="save-btn" style="background: #8e44ad;">Execute Import</button>
+                <div id="import-status" class="status"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -174,7 +196,7 @@
             fields: [
                 { name: 'chapter_id', label: 'Assigned Chapter', type: 'select', source: 'chapters' }, 
                 { name: 'name', label: 'Topic Name', type: 'text' },
-                { name: 'content_tex', label: 'Theory Content (LaTeX)', type: 'latex' } // NOWE
+                { name: 'content_tex', label: 'Theory Content (LaTeX)', type: 'latex' }
             ]
         },
         subtopics: {
@@ -185,7 +207,7 @@
                 { name: 'importance', label: 'Importance (1-5)', type: 'number' },
                 { name: 'sort_order', label: 'Sort Order (Position)', type: 'number' },
                 { name: 'video_url', label: 'Video URL (optional)', type: 'text' },
-                { name: 'content_tex', label: 'Theory Content (LaTeX)', type: 'latex' } // NOWE
+                { name: 'content_tex', label: 'Theory Content (LaTeX)', type: 'latex' }
             ]
         },
         task_groups: {
@@ -217,7 +239,7 @@
         }
     }
 
-    // --- NEW: SEARCH LOGIC ---
+    // --- SEARCH LOGIC ---
     function performSearch(query) {
         const resultsContainer = document.getElementById('search-results');
         if (!query || query.length < 2) {
@@ -349,12 +371,15 @@
     function switchTab(tab) {
         document.getElementById('tab-tree').classList.toggle('active', tab === 'tree');
         document.getElementById('tab-edges').classList.toggle('active', tab === 'edges');
+        document.getElementById('tab-import').classList.toggle('active', tab === 'import');
         
         document.getElementById('empty-state').style.display = 'none';
         document.getElementById('form-container').style.display = 'none';
         document.getElementById('edges-manager').style.display = tab === 'edges' ? 'block' : 'none';
+        document.getElementById('import-view').style.display = tab === 'import' ? 'block' : 'none';
         
         if (tab === 'tree') document.getElementById('empty-state').style.display = 'block';
+        if (tab === 'import') renderImportSchema();
     }
 
     function generateFormFields(table) {
@@ -506,6 +531,80 @@
             const res = await fetch(`${API_URL}/delete_edge/${parentId}/${childId}`, { method: 'DELETE' });
             if (res.ok) await loadDatabase(); else throw new Error();
         } catch (e) { alert("Error removing relation."); }
+    }
+
+    // --- BULK IMPORT LOGIC ---
+    function renderImportSchema() {
+        function buildTemplate(tableName) {
+            let obj = {};
+            SCHEMA[tableName].fields.forEach(f => {
+                if (f.name !== SCHEMA[tableName].fkName) {
+                    obj[f.name] = `<${f.label}>`;
+                }
+            });
+            if (SCHEMA[tableName].childTable) {
+                obj[SCHEMA[tableName].childTable] = [buildTemplate(SCHEMA[tableName].childTable)];
+            }
+            return obj;
+        }
+        
+        const template = { chapters: [buildTemplate('chapters')] };
+        document.getElementById('schema-preview').innerText = "Expected JSON format (Auto-generated):\n\n" + JSON.stringify(template, null, 2);
+    }
+
+    async function executeImport() {
+        const status = document.getElementById('import-status');
+        const rawJson = document.getElementById('import-json').value;
+        if (!rawJson) return;
+
+        try {
+            const data = JSON.parse(rawJson);
+            status.innerText = "Parsing & Importing... DO NOT CLOSE THIS PAGE.";
+            status.className = "status";
+
+            for (let ch of data.chapters || []) {
+                let chRes = await fetch(`${API_URL}/create/chapters`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: ch.name }) });
+                if (!chRes.ok) throw new Error("Failed creating chapter");
+                let chData = await chRes.json();
+                let chId = chData.data[0].id;
+
+                for (let t of ch.topics || []) {
+                    let tRes = await fetch(`${API_URL}/create/topics`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chapter_id: chId, name: t.name, content_tex: t.content_tex }) });
+                    if (!tRes.ok) throw new Error("Failed creating topic");
+                    let tData = await tRes.json();
+                    let tId = tData.data[0].id;
+
+                    for (let st of t.subtopics || []) {
+                        let stRes = await fetch(`${API_URL}/create/subtopics`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic_id: tId, name: st.name, importance: st.importance || 1, sort_order: st.sort_order || 0, video_url: st.video_url, content_tex: st.content_tex }) });
+                        if (!stRes.ok) throw new Error("Failed creating subtopic");
+                        let stData = await stRes.json();
+                        let stId = stData.data[0].id;
+
+                        for (let tg of st.task_groups || []) {
+                            let tgRes = await fetch(`${API_URL}/create/task_groups`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subtopic_id: stId, name: tg.name }) });
+                            if (!tgRes.ok) throw new Error("Failed creating task group");
+                            let tgData = await tgRes.json();
+                            let tgId = tgData.data[0].id;
+
+                            for (let task of tg.tasks || []) {
+                                let taskRes = await fetch(`${API_URL}/create/tasks`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task_group_id: tgId, content: task.content, difficulty_level: task.difficulty_level || 'Easy', correct_answer: task.correct_answer, video_url: task.video_url }) });
+                                if (!taskRes.ok) throw new Error("Failed creating task");
+                            }
+                        }
+                    }
+                }
+            }
+
+            status.innerText = "Success! Bulk import completed.";
+            status.classList.add('success');
+            document.getElementById('import-json').value = '';
+            await loadDatabase();
+            
+        } catch (e) {
+            console.error(e);
+            status.innerText = "Error parsing JSON or executing requests. Check console.";
+            status.classList.add('error');
+        }
     }
 
     loadDatabase();
