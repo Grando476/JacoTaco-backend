@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from pydantic import BaseModel
+from typing import List
 
 # FastAPI backend init
 app = FastAPI(
@@ -44,7 +46,12 @@ async def get_nodes():
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
         # Fetch nodes (topics)
-        cur.execute("SELECT id, name FROM public.topics;")
+        cur.execute("""
+            SELECT t.id, t.name, t.ui_x, t.ui_y, COUNT(s.id) as subtasks_count
+            FROM public.topics t
+            LEFT JOIN public.subtopics s ON t.id = s.topic_id
+            GROUP BY t.id, t.name, t.ui_x, t.ui_y;
+        """)
         nodes = cur.fetchall()
         
         # Fetch edges (topic_edges)
@@ -72,5 +79,33 @@ async def get_node_lessons(node_id: str):
         cur.close()
         conn.close()
         return {"lessons": lessons}
+    except Exception as e:
+        return {"error": str(e)}
+
+class NodePosition(BaseModel):
+    id: str
+    x: int
+    y: int
+
+class UpdatePositionsRequest(BaseModel):
+    positions: List[NodePosition]
+
+@app.put("/api/v1/nodes/positions")
+async def update_node_positions(request: UpdatePositionsRequest):
+    """
+    Updates the physical X and Y coordinates for multiple topic nodes.
+    """
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        for pos in request.positions:
+            cur.execute(
+                "UPDATE public.topics SET ui_x = %s, ui_y = %s WHERE id = %s",
+                (pos.x, pos.y, pos.id)
+            )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {"status": "success"}
     except Exception as e:
         return {"error": str(e)}

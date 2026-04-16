@@ -1,42 +1,50 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ReactFlow, Background, Controls, Node, Edge, useNodesState, useEdgesState, Position } from "@xyflow/react";
+import { ReactFlow, Background, Controls, Node, Edge, useNodesState, useEdgesState, Position, Handle, BackgroundVariant } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import dagre from "dagre";
-// import { useRouter } from "next/navigation";
 
-const dagreGraph = new dagre.graphlib.Graph();
-dagreGraph.setDefaultEdgeLabel(() => ({}));
+const CyberNode = ({ data, selected }: any) => {
+  const color = selected ? '#fcee0a' : '#0ea5e9';
+  const dropShadow = selected ? `drop-shadow(0 0 10px ${color})` : 'none';
+  
+  return (
+    <div style={{ position: 'relative', width: 140, height: 140, filter: dropShadow, transition: 'all 0.2s', cursor: 'pointer' }}>
+      <svg width="140" height="140" viewBox="0 0 140 140" style={{ position: 'absolute', top: 0, left: 0 }}>
+         {/* Outer glowing octagon */}
+         <polygon points="40,5 100,5 135,40 135,100 100,135 40,135 5,100 5,40" 
+            fill="#0a0a0c" stroke={color} strokeWidth="3" opacity="0.9" />
+         {/* Inner decoration octagon */}
+         <polygon points="45,15 95,15 125,45 125,95 95,125 45,125 15,95 15,45" 
+            fill="rgba(255, 255, 255, 0.03)" stroke={color} strokeWidth="1" opacity="0.5" />
+      </svg>
+      
+      <Handle type="target" position={Position.Bottom} style={{ background: 'transparent', border: 'none' }} />
+      
+      <div style={{ 
+          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
+          color: color, textAlign: 'center', display: 'flex', flexDirection: 'column', 
+          alignItems: 'center', justifyContent: 'center', width: '70%', height: '70%',
+          pointerEvents: 'none'
+      }}>
+         <span style={{ fontSize: '0.8rem', fontWeight: 'bold', lineHeight: '1.2', textShadow: `0 0 4px ${color}`, wordBreak: 'break-word' }}>
+             {data.label}
+         </span>
+         <span style={{ 
+             fontSize: '0.7rem', background: color, color: '#0a0a0c', 
+             padding: '2px 8px', marginTop: '8px', borderRadius: '2px', fontWeight: 'bold'
+         }}>
+            {data.subtasksCount ? `${data.subtasksCount}/${data.subtasksCount}` : '0/0'}
+         </span>
+      </div>
+      
+      <Handle type="source" position={Position.Top} style={{ background: 'transparent', border: 'none' }} />
+    </div>
+  );
+};
 
-const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
-  const isHorizontal = direction === 'LR';
-  dagreGraph.setGraph({ rankdir: direction });
-
-  nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: 220, height: 50 });
-  });
-
-  edges.forEach((edge) => {
-    dagreGraph.setEdge(edge.source, edge.target);
-  });
-
-  dagre.layout(dagreGraph);
-
-  nodes.forEach((node) => {
-    const nodeWithPosition = dagreGraph.node(node.id);
-    node.targetPosition = isHorizontal ? Position.Left : Position.Top;
-    node.sourcePosition = isHorizontal ? Position.Right : Position.Bottom;
-
-    node.position = {
-      x: nodeWithPosition.x - 220 / 2,
-      y: nodeWithPosition.y - 50 / 2,
-    };
-
-    return node;
-  });
-
-  return { nodes, edges };
+const nodeTypes = {
+  cyber: CyberNode,
 };
 
 export default function Home() {
@@ -44,6 +52,7 @@ export default function Home() {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [loading, setLoading] = useState(true);
+  const [savingLayout, setSavingLayout] = useState(false);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [sidebarLessons, setSidebarLessons] = useState<any[]>([]);
   const [loadingLessons, setLoadingLessons] = useState(false);
@@ -59,23 +68,11 @@ export default function Home() {
           
           const rawNodes: Node[] = data.nodes.map((n: any) => ({
               id: n.id,
-              position: { x: 0, y: 0 },
-              data: { label: n.name },
-              style: { 
-                padding: '12px 20px', 
-                borderRadius: '9999px',
-                background: 'linear-gradient(to right, #0ea5e9, #10b981)',
-                border: 'none', 
-                color: '#ffffff', 
-                width: 220, 
-                cursor: 'pointer', 
-                textAlign: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: '600',
-                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4)'
-              }
+              type: 'cyber',
+              targetPosition: Position.Bottom,
+              sourcePosition: Position.Top,
+              position: { x: n.ui_x || 0, y: n.ui_y || 0 },
+              data: { label: n.name, subtasksCount: n.subtasks_count },
           }));
           
           const rawEdges: Edge[] = data.edges.map((e: any, idx: number) => ({
@@ -84,17 +81,15 @@ export default function Home() {
               target: e.target,
               type: 'smoothstep',
               animated: false,
-              style: { stroke: '#334155', strokeWidth: 2 }
+              style: { 
+                stroke: '#0ea5e9',
+                strokeWidth: 3,
+                filter: 'drop-shadow(0 0 5px rgba(14, 165, 233, 0.6))'
+              }
           }));
-          
-          const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-            rawNodes,
-            rawEdges,
-            'TB'
-          );
 
-          setNodes(layoutedNodes);
-          setEdges(layoutedEdges);
+          setNodes(rawNodes);
+          setEdges(rawEdges);
         }
       } catch (err) {
         console.error("Error fetching nodes:", err);
@@ -125,21 +120,76 @@ export default function Home() {
       }
   }, []);
 
+  const saveLayout = async () => {
+    setSavingLayout(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const positions = nodes.map((n) => ({
+        id: n.id,
+        x: Math.round(n.position.x),
+        y: Math.round(n.position.y),
+      }));
+      
+      const res = await fetch(`${apiUrl}/api/v1/nodes/positions`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ positions }),
+      });
+      if (!res.ok) {
+        let msg = `HTTP Error ${res.status}: ${res.statusText}`;
+        try {
+          const errData = await res.json();
+          msg += ` - ${errData.detail || errData.error || JSON.stringify(errData)}`;
+        } catch {
+          msg += ` - ${await res.text()}`;
+        }
+        throw new Error(msg);
+      }
+      
+      const data = await res.json();
+      if (data.error) {
+         throw new Error(`Database Error: ${data.error}`);
+      }
+      
+      alert("Layout saved successfully!");
+    } catch (err: any) {
+      console.error("Error saving layout:", err);
+      alert(`Failed to save layout.\n\nDetails: ${err.message}`);
+    } finally {
+      setSavingLayout(false);
+    }
+  };
+
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#12171c', display: 'flex' }}>
+    <div style={{ width: '100vw', height: '100vh', background: '#0a0a0c', display: 'flex' }}>
       <div style={{ flex: 1, position: 'relative' }}>
           {loading ? (
               <div className="flex items-center justify-center h-full w-full">
-                  <p className="text-2xl font-semibold text-cyan-500 animate-pulse">Loading EduMath Graph...</p>
+                  <p className="text-2xl font-semibold text-[#fcee0a] animate-pulse">Initializing Cyber-Tree...</p>
               </div>
           ) : (
+              <>
+              <button 
+                  onClick={saveLayout}
+                  disabled={savingLayout}
+                  style={{
+                      position: 'absolute', top: 20, right: 20, zIndex: 100,
+                      padding: '10px 20px', background: savingLayout ? '#64748b' : '#0ea5e9',
+                      color: 'white', border: 'none', borderRadius: '5px',
+                      fontWeight: 'bold', cursor: savingLayout ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 0 15px rgba(14, 165, 233, 0.4)', transition: 'background 0.2s'
+                  }}
+              >
+                  {savingLayout ? 'Saving...' : 'Save Layout'}
+              </button>
               <ReactFlow 
                 nodes={nodes} 
                 edges={edges} 
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onNodeClick={onNodeClick}
-                nodesDraggable={false}
+                nodeTypes={nodeTypes}
+                nodesDraggable={true}
                 nodesConnectable={false}
                 elementsSelectable={true}
                 panOnDrag={true}
@@ -150,9 +200,10 @@ export default function Home() {
                 fitView
                 proOptions={{ hideAttribution: true }}
               >
-                <Background color="#334155" gap={20} />
-                <Controls />
+                <Background color="#1f1f22" gap={25} size={2} variant={BackgroundVariant.Dots} />
+                <Controls style={{ filter: 'invert(80%) sepia(90%) saturate(400%) hue-rotate(360deg)' }} />
               </ReactFlow>
+              </>
           )}
       </div>
       
