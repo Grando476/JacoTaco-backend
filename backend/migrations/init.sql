@@ -52,9 +52,9 @@ CREATE TABLE IF NOT EXISTS public.task_groups (
 CREATE TABLE IF NOT EXISTS public.tasks (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     task_group_id UUID NOT NULL REFERENCES public.task_groups(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
+    task_type VARCHAR(50) NOT NULL, -- np. 'MCQ', 'FILL_BLANK', 'COORDINATES'
+    content JSONB NOT NULL, -- tutaj wrzucasz treść zadania, opcje ABCD, obrazki i poprawne odpowiedzi
     difficulty_level task_difficulty DEFAULT 'Easy' NOT NULL,
-    correct_answer TEXT, 
     video_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
