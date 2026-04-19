@@ -59,5 +59,14 @@ def delete_edge(parent_id, child_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/schema', methods=['GET'])
+def get_schema():
+    try:
+        tables = ["chapters", "topics", "subtopics", "task_groups", "tasks"]
+        res = supabase.rpc("get_schema_info", {"tables": tables}).execute()
+        return jsonify(res.data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(port=5000)

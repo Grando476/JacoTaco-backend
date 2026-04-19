@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.topics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     chapter_id UUID NOT NULL REFERENCES public.chapters(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    content_tex TEXT DEFAULT '', -- NOWE POLA
+    content_tex TEXT DEFAULT '',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS public.topic_edges (
 CREATE INDEX IF NOT EXISTS idx_topic_edges_parent ON public.topic_edges(parent_id);
 CREATE INDEX IF NOT EXISTS idx_topic_edges_child ON public.topic_edges(child_id);
 
--- 3. Subtematy (ZMODYFIKOWANE)
+-- 3. Subtematy
 CREATE TABLE IF NOT EXISTS public.subtopics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     topic_id UUID NOT NULL REFERENCES public.topics(id) ON DELETE CASCADE,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS public.subtopics (
     importance SMALLINT CHECK (importance >= 1 AND importance <= 5) NOT NULL,
     sort_order INTEGER DEFAULT 0 NOT NULL,
     video_url TEXT,
-    content_tex TEXT DEFAULT '', -- NOWE POLA
+    content_tex TEXT DEFAULT '',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -50,8 +50,8 @@ CREATE TABLE IF NOT EXISTS public.task_groups (
 CREATE TABLE IF NOT EXISTS public.tasks (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     task_group_id UUID NOT NULL REFERENCES public.task_groups(id) ON DELETE CASCADE,
-    task_type VARCHAR(50) NOT NULL, -- np. 'MCQ', 'FILL_BLANK', 'COORDINATES'
-    content JSONB NOT NULL, -- tutaj wrzucasz treść zadania, opcje ABCD, obrazki i poprawne odpowiedzi
+    task_type VARCHAR(50) NOT NULL,
+    content JSONB NOT NULL,
     difficulty_level task_difficulty DEFAULT 'Easy' NOT NULL,
     video_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -73,3 +73,13 @@ AS $$
   FROM information_schema.tables 
   WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
 $$;
+
+-- NOWA FUNKCJA DO POBIERANIA SCHEMATU Z BAZY
+CREATE OR REPLACE FUNCTION get_schema_info(tables text[])
+RETURNS json LANGUAGE plpgsql AS $$
+DECLARE res json;
+BEGIN
+  SELECT json_agg(json_build_object('table', table_name, 'column', column_name, 'type', data_type))
+  INTO res FROM information_schema.columns WHERE table_name = ANY(tables);
+  RETURN res;
+END; $$;

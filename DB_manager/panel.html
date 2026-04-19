@@ -20,13 +20,11 @@
         .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .sidebar-header h2 { margin: 0; font-size: 18px; }
         
-        /* Zmienione lekko by pomieścić 3 przyciski */
         .header-buttons { display: flex; gap: 5px; width: 100%; flex-wrap: wrap; }
         .header-buttons button { flex: 1; min-width: 30%; background: #34495e; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
         .header-buttons button:hover { background: #465c71; }
         .header-buttons button.active { background: #3498db; }
         
-        /* SEARCH BOX STYLES */
         .search-container { position: relative; width: 100%; }
         .search-input { width: 100%; padding: 8px 12px; border: none; border-radius: 4px; box-sizing: border-box; font-family: inherit; background: #ecf0f1; }
         .search-results { position: absolute; top: 100%; left: 0; right: 0; background: white; color: #333; border-radius: 0 0 4px 4px; max-height: 300px; overflow-y: auto; display: none; z-index: 100; list-style: none; margin: 0; padding: 0; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
@@ -80,7 +78,6 @@
         .edge-item { display: flex; justify-content: space-between; background: #f8f9fa; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px; }
         .btn-sm-del { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
 
-        /* IMPORT STYLES */
         .import-layout { display: flex; gap: 20px; align-items: flex-start; }
         .schema-preview-box { flex: 1; background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto; max-height: 700px; overflow-y: auto; }
         .import-input-box { flex: 2; display: flex; flex-direction: column; gap: 10px; }
@@ -171,13 +168,11 @@
     let DB = {};
     let expandedNodes = new Set(); 
 
-    // Close search dropdown on outside click
     document.addEventListener('click', (e) => {
         const searchRes = document.getElementById('search-results');
         if (e.target.id !== 'search-input' && searchRes) searchRes.style.display = 'none';
     });
 
-    // Sidebar Resizer
     const resizer = document.getElementById('resizer');
     const sidebar = document.getElementById('sidebar');
     let isResizing = false;
@@ -185,48 +180,41 @@
     document.addEventListener('mousemove', (e) => { if (!isResizing) return; sidebar.style.width = Math.max(200, Math.min(e.clientX, window.innerWidth - 400)) + 'px'; });
     document.addEventListener('mouseup', () => { isResizing = false; document.body.style.cursor = 'default'; resizer.classList.remove('resizing'); });
 
-    // 1. DATA SCHEMA
     const SCHEMA = {
-        chapters: {
-            title: "Chapter", childTable: "topics", fkName: null,
-            fields: [{ name: 'name', label: 'Chapter Name', type: 'text' }]
-        },
-        topics: {
-            title: "Topic", childTable: "subtopics", fkName: "chapter_id", parentTable: "chapters",
-            fields: [
-                { name: 'chapter_id', label: 'Assigned Chapter', type: 'select', source: 'chapters' }, 
-                { name: 'name', label: 'Topic Name', type: 'text' },
-                { name: 'content_tex', label: 'Theory Content (LaTeX)', type: 'latex' }
-            ]
-        },
-        subtopics: {
-            title: "Subtopic", childTable: "task_groups", fkName: "topic_id", parentTable: "topics",
-            fields: [
-                { name: 'topic_id', label: 'Assigned Topic', type: 'select', source: 'topics' }, 
-                { name: 'name', label: 'Subtopic Name', type: 'text' }, 
-                { name: 'importance', label: 'Importance (1-5)', type: 'number' },
-                { name: 'sort_order', label: 'Sort Order (Position)', type: 'number' },
-                { name: 'video_url', label: 'Video URL (optional)', type: 'text' },
-                { name: 'content_tex', label: 'Theory Content (LaTeX)', type: 'latex' }
-            ]
-        },
-        task_groups: {
-            title: "Task Group", childTable: "tasks", fkName: "subtopic_id", parentTable: "subtopics",
-            fields: [{ name: 'subtopic_id', label: 'Assigned Subtopic', type: 'select', source: 'subtopics' }, { name: 'name', label: 'Group Name', type: 'text' }]
-        },
-        tasks: {
-            title: "Task", childTable: null, fkName: "task_group_id", parentTable: "task_groups",
-            fields: [
-                { name: 'task_group_id', label: 'Task Group', type: 'select', source: 'task_groups' }, 
-                { name: 'content', label: 'Content (use $ for math)', type: 'latex' }, 
-                { name: 'difficulty_level', label: 'Difficulty', type: 'enum' }, 
-                { name: 'correct_answer', label: 'Correct Answer (LaTeX - use $)', type: 'latex-small' }, 
-                { name: 'video_url', label: 'Video URL', type: 'text' }
-            ]
-        }
+        chapters: { title: "Chapter", childTable: "topics", fkName: null, fields: [] },
+        topics: { title: "Topic", childTable: "subtopics", fkName: "chapter_id", parentTable: "chapters", fields: [] },
+        subtopics: { title: "Subtopic", childTable: "task_groups", fkName: "topic_id", parentTable: "topics", fields: [] },
+        task_groups: { title: "Task Group", childTable: "tasks", fkName: "subtopic_id", parentTable: "subtopics", fields: [] },
+        tasks: { title: "Task", childTable: null, fkName: "task_group_id", parentTable: "task_groups", fields: [] }
     };
 
-    // 2. CORE LOGIC & SEARCH
+    async function loadDynamicSchema() {
+        const res = await fetch(`${API_URL}/schema`);
+        const dbColumns = await res.json();
+
+        const typeMapping = {
+            'uuid': 'text', 'character varying': 'text', 'text': 'text',
+            'smallint': 'number', 'integer': 'number', 'jsonb': 'text', 'USER-DEFINED': 'enum'
+        };
+
+        dbColumns.forEach(col => {
+            if (!SCHEMA[col.table]) return;
+            if (col.column === 'id' || col.column === 'created_at') return;
+
+            let inputType = typeMapping[col.type] || 'text';
+            
+            if (col.column.endsWith('_id')) inputType = 'select';
+            if (col.column === 'content' || col.column === 'content_tex') inputType = 'latex';
+
+            SCHEMA[col.table].fields.push({
+                name: col.column,
+                label: col.column.replace('_', ' ').toUpperCase(),
+                type: inputType,
+                source: col.column.endsWith('_id') ? col.column.replace('_id', 's') : null
+            });
+        });
+    }
+
     async function loadDatabase() {
         try {
             const res = await fetch(`${API_URL}/data`);
@@ -239,7 +227,6 @@
         }
     }
 
-    // --- SEARCH LOGIC ---
     function performSearch(query) {
         const resultsContainer = document.getElementById('search-results');
         if (!query || query.length < 2) {
@@ -284,7 +271,6 @@
         let currentTable = targetTable;
         let currentId = targetId;
 
-        // Trace parents to root to expand folders
         while (currentTable && currentId) {
             expandedNodes.add(currentId);
             let item = DB[currentTable].find(x => x.id === currentId);
@@ -300,12 +286,11 @@
         buildTree();
         editRecord(targetTable, targetId);
 
-        // Scroll into view and highlight
         setTimeout(() => {
             const nodeEl = document.querySelector(`span[data-id="${targetId}"]`);
             if (nodeEl) {
                 nodeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                nodeEl.style.backgroundColor = '#f1c40f'; // Highlight
+                nodeEl.style.backgroundColor = '#f1c40f'; 
                 nodeEl.style.color = '#333';
                 setTimeout(() => {
                     nodeEl.style.backgroundColor = '';
@@ -314,7 +299,6 @@
             }
         }, 100);
     }
-    // -------------------------
 
     function buildTree() {
         const container = document.getElementById('tree-container');
@@ -367,7 +351,6 @@
         }
     }
 
-    // 3. TABS & FORMS
     function switchTab(tab) {
         document.getElementById('tab-tree').classList.toggle('active', tab === 'tree');
         document.getElementById('tab-edges').classList.toggle('active', tab === 'edges');
@@ -465,7 +448,7 @@
     }
 
     async function deleteData() {
-        const table = document.getElementById('form-table').value;
+        const table = document.getElementById('form-table').value;  
         const id = document.getElementById('form-id').value;
         if (!id || !confirm(`Delete this element permanently?`)) return;
         try {
@@ -475,7 +458,6 @@
         } catch (e) { alert("Error deleting. Check locked relations."); }
     }
 
-    // 4. TOPIC EDGES MANAGER
     function populateEdgesDropdowns() {
         const childSelect = document.getElementById('edge-child-select');
         const parentSelect = document.getElementById('edge-parent-select');
@@ -533,7 +515,6 @@
         } catch (e) { alert("Error removing relation."); }
     }
 
-    // --- BULK IMPORT LOGIC ---
     function renderImportSchema() {
         function buildTemplate(tableName) {
             let obj = {};
@@ -587,7 +568,17 @@
                             let tgId = tgData.data[0].id;
 
                             for (let task of tg.tasks || []) {
-                                let taskRes = await fetch(`${API_URL}/create/tasks`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task_group_id: tgId, content: task.content, difficulty_level: task.difficulty_level || 'Easy', correct_answer: task.correct_answer, video_url: task.video_url }) });
+                                let taskRes = await fetch(`${API_URL}/create/tasks`, { 
+                                    method: 'POST', 
+                                    headers: { 'Content-Type': 'application/json' }, 
+                                    body: JSON.stringify({ 
+                                        task_group_id: tgId, 
+                                        task_type: task.task_type || 'MCQ', 
+                                        content: task.content, 
+                                        difficulty_level: task.difficulty_level || 'Easy', 
+                                        video_url: task.video_url 
+                                    }) 
+                                });
                                 if (!taskRes.ok) throw new Error("Failed creating task");
                             }
                         }
@@ -607,7 +598,11 @@
         }
     }
 
-    loadDatabase();
+    async function initApp() {
+        await loadDynamicSchema();
+        await loadDatabase();
+    }
+    initApp();
 </script>
 
 </body>
