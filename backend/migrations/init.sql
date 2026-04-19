@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS public.tasks (
     task_type VARCHAR(50) NOT NULL,
     content JSONB NOT NULL,
     difficulty_level task_difficulty DEFAULT 'Easy' NOT NULL,
+    exemplary_solution TEXT,
     video_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

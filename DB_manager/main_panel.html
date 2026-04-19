@@ -204,7 +204,7 @@
             let inputType = typeMapping[col.type] || 'text';
             
             if (col.column.endsWith('_id')) inputType = 'select';
-            if (col.column === 'content' || col.column === 'content_tex') inputType = 'latex';
+            if (col.column === 'content' || col.column === 'content_tex' || col.column === 'exemplary_solution') inputType = 'latex';
 
             SCHEMA[col.table].fields.push({
                 name: col.column,
@@ -229,24 +229,25 @@
 
     function performSearch(query) {
         const resultsContainer = document.getElementById('search-results');
-        if (!query || query.length < 2) {
-            resultsContainer.style.display = 'none';
-            return;
-        }
-
+        if (!query || query.length < 2) { resultsContainer.style.display = 'none'; return; }
+        
         const lowerQuery = query.toLowerCase();
         let results = [];
-
+        
         ['chapters', 'topics', 'subtopics', 'task_groups', 'tasks'].forEach(table => {
             if (!DB[table]) return;
             DB[table].forEach(item => {
-                const textToSearch = item.name || item.content || "";
-                if (textToSearch.toLowerCase().includes(lowerQuery)) {
-                    results.push({ table, item });
+                let textToSearch = item.name || "";
+                
+                // POPRAWKA: Bezpieczne pobieranie tekstu do wyszukiwania
+                if (item.content) {
+                    textToSearch += " " + (typeof item.content === 'object' ? JSON.stringify(item.content) : String(item.content));
                 }
+                
+                if (textToSearch.toLowerCase().includes(lowerQuery)) results.push({ table, item });
             });
         });
-
+        
         resultsContainer.innerHTML = '';
         if (results.length === 0) {
             resultsContainer.innerHTML = '<li class="search-item"><span>No results found</span></li>';
@@ -254,13 +255,19 @@
             results.slice(0, 15).forEach(res => {
                 const li = document.createElement('li');
                 li.className = 'search-item';
-                const displayName = res.item.name || (res.item.content ? res.item.content.substring(0, 50) + "..." : "Unnamed");
+                
+                // POPRAWKA: Bezpieczne wyciąganie nazwy wyświetlanej
+                let displayName = res.item.name;
+                if (!displayName) {
+                    if (res.item.content) {
+                        displayName = typeof res.item.content === 'string' ? res.item.content.substring(0, 50) : "Task MCQ (JSON)";
+                    } else {
+                        displayName = "Unnamed";
+                    }
+                }
+                
                 li.innerHTML = `<strong>${SCHEMA[res.table].title}</strong><span>${displayName}</span>`;
-                li.onclick = () => {
-                    document.getElementById('search-input').value = '';
-                    resultsContainer.style.display = 'none';
-                    expandToNode(res.table, res.item.id);
-                };
+                li.onclick = () => { document.getElementById('search-input').value = ''; resultsContainer.style.display = 'none'; expandToNode(res.table, res.item.id); };
                 resultsContainer.appendChild(li);
             });
         }
@@ -322,8 +329,19 @@
         }
 
         const hasChildren = children.length > 0;
-        const displayName = item.name || (item.content ? item.content.substring(0, 30) + "..." : "Unnamed");
         const isExpanded = expandedNodes.has(item.id);
+        
+        // POPRAWKA: Bezpieczne wyciąganie nazwy do drzewka
+        let displayName = item.name;
+        if (!displayName) {
+            if (item.content && typeof item.content === 'object' && item.content.question) {
+                displayName = item.content.question.substring(0, 30) + "...";
+            } else if (typeof item.content === 'string') {
+                displayName = item.content.substring(0, 30) + "...";
+            } else {
+                displayName = `Zadanie (${item.id.substring(0, 6)})`;
+            }
+        }
 
         li.innerHTML = `
             <div class="tree-node">
@@ -417,6 +435,23 @@
                 if (f.type.includes('latex')) renderLatex(`field-${f.name}`, `preview-${f.name}`);
             }
         });
+        let genBtn = document.getElementById('go-to-generator-btn');
+        if (!genBtn) {
+            genBtn = document.createElement('button');
+            genBtn.id = 'go-to-generator-btn';
+            genBtn.type = 'button';
+            genBtn.className = 'save-btn';
+            genBtn.style.background = '#8e44ad';
+            genBtn.innerText = '✨ Generuj AI';
+            document.querySelector('.btn-group').appendChild(genBtn);
+        }
+        
+        if (table === 'task_groups') {
+            genBtn.style.display = 'block';
+            genBtn.onclick = () => window.open(`task_generator/task_generator_panel.html?tg_id=${id}`, '_blank');
+        } else {
+            genBtn.style.display = 'none';
+        }
     }
 
     function createNew(table, parentFkName, parentId) {
@@ -576,7 +611,8 @@
                                         task_type: task.task_type || 'MCQ', 
                                         content: task.content, 
                                         difficulty_level: task.difficulty_level || 'Easy', 
-                                        video_url: task.video_url 
+                                        video_url: task.video_url ,
+                                        exemplary_solution: task.exemplary_solution
                                     }) 
                                 });
                                 if (!taskRes.ok) throw new Error("Failed creating task");

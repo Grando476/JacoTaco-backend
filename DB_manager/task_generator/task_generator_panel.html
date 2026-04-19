@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Task Generator - Piaskownica</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; display: flex; flex-direction: column; height: 100vh; color: #333; }
+        .header { background: #2c3e50; color: white; padding: 15px 30px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .header select, .header input { padding: 8px; border-radius: 4px; border: none; }
+        .header input { width: 60px; text-align: center; }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
+        .btn-generate { background: #8e44ad; } .btn-generate:hover { background: #9b59b6; }
+        .btn-save { background: #2ecc71; } .btn-save:hover { background: #27ae60; }
+        .btn-delete { background: #e74c3c; padding: 5px 10px; }
+        
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .task-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%; max-width: 800px; position: relative; border-left: 5px solid #3498db; }
+        .task-card.Easy { border-left-color: #2ecc71; }
+        .task-card.Medium { border-left-color: #f1c40f; }
+        .task-card.Hard { border-left-color: #e67e22; }
+        .task-card.Very.Hard { border-left-color: #e74c3c; }
+        
+        .form-group { margin-bottom: 10px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; color: #555; }
+        textarea, input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        textarea { resize: vertical; min-height: 60px; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .latex-preview { background: #fdfdfd; border: 1px dashed #bdc3c7; padding: 10px; margin-top: 5px; min-height: 20px; font-size: 14px; }
+        
+        #loading { display: none; font-size: 18px; font-weight: bold; color: #8e44ad; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2>AI Generator</h2>
+    <select id="tg-select"><option value="">Wybierz Task Group...</option></select>
+    
+    <label style="margin-left: 15px;">Zadań na poziom: 
+        <input type="number" id="task-count" value="2" min="1" style="width: 50px;">
+    </label>
+    
+    <div style="display: flex; gap: 15px; margin-left: 15px; align-items: center;">
+        <label><input type="checkbox" class="diff-cb" value="Easy" checked> Easy</label>
+        <label><input type="checkbox" class="diff-cb" value="Medium" checked> Medium</label>
+        <label><input type="checkbox" class="diff-cb" value="Hard"> Hard</label>
+        <label><input type="checkbox" class="diff-cb" value="Very Hard"> Very Hard</label>
+    </div>
+    
+    <button class="btn btn-generate" onclick="generateTasks()" style="margin-left: auto;">✨ Generuj AI</button>
+    <button class="btn btn-save" onclick="saveAllToDB()" id="save-btn" style="display:none;">💾 Zapisz wszystko do bazy</button>
+</div>
+
+<div class="main-content">
+    <div id="loading">Generowanie w toku (może potrwać kilka minut)...</div>
+    <div id="tasks-container" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px;"></div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:5000/api';
+    let generatedTasks = [];
+
+    async function init() {
+        try {
+            const res = await fetch(`${API_URL}/data`);
+            const db = await res.json();
+            const select = document.getElementById('tg-select');
+            
+            db.task_groups.forEach(tg => {
+                const subtopic = db.subtopics.find(s => s.id === tg.subtopic_id);
+                const topic = db.topics.find(t => t.id === subtopic?.topic_id);
+                const path = `${topic?.name || '?'} > ${subtopic?.name || '?'} > ${tg.name}`;
+                select.innerHTML += `<option value="${tg.id}">${path}</option>`;
+            });
+            // Pobranie ID z URLa
+            const urlParams = new URLSearchParams(window.location.search);
+            const tgIdFromUrl = urlParams.get('tg_id');
+            if (tgIdFromUrl) {
+                document.getElementById('tg-select').value = tgIdFromUrl;
+            }
+        } catch (e) {
+            alert("Błąd połączenia z API.");
+        }
+    }
+
+    async function generateTasks() {
+        const tgId = document.getElementById('tg-select').value;
+        const taskCount = parseInt(document.getElementById('task-count').value) || 0;
+        const checkboxes = document.querySelectorAll('.diff-cb:checked');
+
+        if (!tgId || taskCount < 1 || checkboxes.length === 0) return alert("Brak danych!");
+
+        const counts = { 'Easy': 0, 'Medium': 0, 'Hard': 0, 'Very Hard': 0 };
+        checkboxes.forEach(cb => counts[cb.value] = taskCount);
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('tasks-container').innerHTML = '';
+        document.getElementById('save-btn').style.display = 'none';
+        generatedTasks = [];
+
+        try {
+            const res = await fetch(`http://localhost:5001/api/generate/${tgId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(counts)
+            });
+
+            // Odbieranie streamingu
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let partialData = '';
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                
+                partialData += decoder.decode(value, { stream: true });
+                const lines = partialData.split('\n');
+                partialData = lines.pop(); // Zostawia niepełną linię na kolejny cykl
+
+                for (const line of lines) {
+                    if (line.trim()) {
+                        const task = JSON.parse(line);
+                        generatedTasks.push(task);
+                        renderSingleTask(task, generatedTasks.length - 1);
+                        document.getElementById('save-btn').style.display = 'block';
+                    }
+                }
+            }
+        } catch (e) {
+            alert("Błąd API.");
+            console.error(e);
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    function renderSingleTask(task, index) {
+        const container = document.getElementById('tasks-container');
+        const safeClass = task.difficulty_level.replace(' ', '.');
+        
+        // Czerwony/Zielony border na podstawie walidacji
+        const validationStyle = task.validation?.is_perfect ? 'border: 3px solid #2ecc71;' : 'border: 3px solid #e74c3c;';
+        const feedbackStr = task.validation?.is_perfect ? '✅ Valid' : `❌ ${task.validation?.feedback || 'Błąd'}`;
+
+        const html = `
+            <div class="task-card ${safeClass}" id="task-${index}" style="${validationStyle}">
+                <div class="card-header">
+                    <span>Zadanie ${index + 1} - ${task.difficulty_level} (${feedbackStr})</span>
+                    <button class="btn btn-delete" onclick="removeTask(${index})">X Usuń</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>Pytanie (LaTeX):</label>
+                    <textarea id="q-${index}" oninput="updatePreview('q-${index}', 'prev-q-${index}')">${task.content.question}</textarea>
+                    <div id="prev-q-${index}" class="latex-preview"></div>
+                </div>
+
+                <div class="options-grid">
+                    ${task.content.options.map((opt, i) => `
+                        <div class="form-group">
+                            <label>Opcja ${['A','B','C','D'][i]}: ${i === task.content.correct_index ? '(POPRAWNA ✅)' : ''}</label>
+                            <input type="text" id="opt-${index}-${i}" value="${opt}" oninput="updatePreview('opt-${index}-${i}', 'prev-opt-${index}-${i}')">
+                            <div id="prev-opt-${index}-${i}" class="latex-preview"></div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="form-group">
+                    <label>Index poprawnej odp. (0=A, 1=B, 2=C, 3=D):</label>
+                    <input type="number" id="corr-${index}" value="${task.content.correct_index}" min="0" max="3">
+                </div>
+
+                <div class="form-group">
+                    <label>Rozwiązanie:</label>
+                    <textarea id="sol-${index}" oninput="updatePreview('sol-${index}', 'prev-sol-${index}')">${task.exemplary_solution || ''}</textarea>
+                    <div id="prev-sol-${index}" class="latex-preview"></div>
+                </div>
+            </div>
+        `;
+        container.innerHTML += html;
+        
+        setTimeout(() => {
+            updatePreview(`q-${index}`, `prev-q-${index}`);
+            [0,1,2,3].forEach(i => updatePreview(`opt-${index}-${i}`, `prev-opt-${index}-${i}`));
+            updatePreview(`sol-${index}`, `prev-sol-${index}`);
+        }, 50);
+    }
+
+    function renderTasks() {
+        const container = document.getElementById('tasks-container');
+        container.innerHTML = '';
+
+        generatedTasks.forEach((task, index) => {
+            const safeClass = task.difficulty_level.replace(' ', '.');
+            
+            // Sprawdzamy status walidacji dla ramki
+            const validationStyle = task.validation?.is_perfect ? 'border: 3px solid #2ecc71;' : 'border: 3px solid #e74c3c;';
+            const feedbackStr = task.validation?.is_perfect ? '✅ Valid' : `❌ ${task.validation?.feedback || 'Błąd'}`;
+
+            const html = `
+                <div class="task-card ${safeClass}" id="task-${index}" style="${validationStyle}">
+                    <div class="card-header">
+                        <span>Zadanie ${index + 1} - ${task.difficulty_level} (${feedbackStr})</span>
+                        <button class="btn btn-delete" onclick="removeTask(${index})">X Usuń</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Pytanie (LaTeX):</label>
+                        <textarea id="q-${index}" oninput="updatePreview('q-${index}', 'prev-q-${index}')">${task.content.question}</textarea>
+                        <div id="prev-q-${index}" class="latex-preview"></div>
+                    </div>
+
+                    <div class="options-grid">
+                        ${task.content.options.map((opt, i) => `
+                            <div class="form-group">
+                                <label>Opcja ${['A','B','C','D'][i]}: ${i === task.content.correct_index ? '(POPRAWNA ✅)' : ''}</label>
+                                <input type="text" id="opt-${index}-${i}" value="${opt}" oninput="updatePreview('opt-${index}-${i}', 'prev-opt-${index}-${i}')">
+                                <div id="prev-opt-${index}-${i}" class="latex-preview"></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Index poprawnej odp. (0=A, 1=B, 2=C, 3=D):</label>
+                        <input type="number" id="corr-${index}" value="${task.content.correct_index}" min="0" max="3">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Rozwiązanie:</label>
+                        <textarea id="sol-${index}" oninput="updatePreview('sol-${index}', 'prev-sol-${index}')">${task.exemplary_solution || ''}</textarea>
+                        <div id="prev-sol-${index}" class="latex-preview"></div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += html;
+            
+            // Render podglądu dla każdego zadania po przerysowaniu listy
+            setTimeout(() => {
+                updatePreview(`q-${index}`, `prev-q-${index}`);
+                [0,1,2,3].forEach(i => updatePreview(`opt-${index}-${i}`, `prev-opt-${index}-${i}`));
+                updatePreview(`sol-${index}`, `prev-sol-${index}`);
+            }, 50);
+        });
+    }
+
+    function removeTask(index) {
+        generatedTasks.splice(index, 1);
+        renderTasks();
+        if (generatedTasks.length === 0) document.getElementById('save-btn').style.display = 'none';
+    }
+
+    function updatePreview(inputId, previewId) {
+        const text = document.getElementById(inputId).value;
+        const el = document.getElementById(previewId);
+        el.innerText = text;
+        renderMathInElement(el, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false });
+    }
+
+    async function saveAllToDB() {
+        const tgId = document.getElementById('tg-select').value;
+        if (!confirm(`Zapiszesz ${generatedTasks.length} zadań do bazy. Kontynuować?`)) return;
+
+        let successCount = 0;
+        
+        for (let i = 0; i < generatedTasks.length; i++) {
+            const q = document.getElementById(`q-${i}`).value;
+            const opts = [
+                document.getElementById(`opt-${i}-0`).value,
+                document.getElementById(`opt-${i}-1`).value,
+                document.getElementById(`opt-${i}-2`).value,
+                document.getElementById(`opt-${i}-3`).value
+            ];
+            const corr = parseInt(document.getElementById(`corr-${i}`).value);
+            const diff = generatedTasks[i].difficulty_level;
+
+            const payload = {
+                task_group_id: tgId,
+                task_type: 'MCQ',
+                difficulty_level: diff,
+                content: { question: q, options: opts, correct_index: corr },
+                exemplary_solution: document.getElementById(`sol-${i}`).value
+            };
+
+            const res = await fetch(`${API_URL}/create/tasks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) successCount++;
+        }
+
+        alert(`Zapisano ${successCount} z ${generatedTasks.length} zadań!`);
+        generatedTasks = [];
+        renderTasks();
+        document.getElementById('save-btn').style.display = 'none';
+    }
+
+    init();
+</script>
+</body>
+</html>

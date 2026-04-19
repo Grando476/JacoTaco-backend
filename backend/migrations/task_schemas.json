@@ -10,6 +10,7 @@
       { "id": "C", "text": "x = 3", "image_url": null },
       { "id": "D", "text": "x = 4", "image_url": null }
     ],
-    "correct_option_id": "B"
+    "correct_option_id": "B",
+    "exemplaray_solution": "2x = 4 | :2 /n x = 2"
   }
 }
