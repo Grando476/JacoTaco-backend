@@ -82,6 +82,26 @@ async def get_node_lessons(node_id: str):
     except Exception as e:
         return {"error": str(e)}
 
+@app.get("/api/v1/lessons/{lesson_id}")
+async def get_lesson_details(lesson_id: str):
+    """
+    Pulls details for a specific lesson (subtopic), including content_tex.
+    """
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("SELECT id, topic_id, name as title, importance, sort_order, video_url, content_tex FROM public.subtopics WHERE id = %s;", (lesson_id,))
+        lesson = cur.fetchone()
+        
+        cur.close()
+        conn.close()
+        if not lesson:
+            return {"error": "Lesson not found"}
+        return {"lesson": lesson}
+    except Exception as e:
+        return {"error": str(e)}
+
 class NodePosition(BaseModel):
     id: str
     x: int

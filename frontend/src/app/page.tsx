@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { ReactFlow, Background, Controls, Node, Edge, useNodesState, useEdgesState, Position, Handle, BackgroundVariant } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
 const CyberNode = ({ data, selected }: any) => {
-  const color = selected ? '#fcee0a' : '#0ea5e9';
+  const color = selected ? '#facc15' : '#4cd39b'; // Yellow when selected, mint green when unselected
   const dropShadow = selected ? `drop-shadow(0 0 10px ${color})` : 'none';
   
   return (
@@ -13,7 +14,7 @@ const CyberNode = ({ data, selected }: any) => {
       <svg width="140" height="140" viewBox="0 0 140 140" style={{ position: 'absolute', top: 0, left: 0 }}>
          {/* Outer glowing octagon */}
          <polygon points="40,5 100,5 135,40 135,100 100,135 40,135 5,100 5,40" 
-            fill="#0a0a0c" stroke={color} strokeWidth="3" opacity="0.9" />
+            fill="#1e293b" stroke={color} strokeWidth="3" opacity="0.9" />
          {/* Inner decoration octagon */}
          <polygon points="45,15 95,15 125,45 125,95 95,125 45,125 15,95 15,45" 
             fill="rgba(255, 255, 255, 0.03)" stroke={color} strokeWidth="1" opacity="0.5" />
@@ -23,15 +24,15 @@ const CyberNode = ({ data, selected }: any) => {
       
       <div style={{ 
           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
-          color: color, textAlign: 'center', display: 'flex', flexDirection: 'column', 
+          color: '#f8fafc', textAlign: 'center', display: 'flex', flexDirection: 'column', 
           alignItems: 'center', justifyContent: 'center', width: '70%', height: '70%',
           pointerEvents: 'none'
       }}>
-         <span style={{ fontSize: '0.8rem', fontWeight: 'bold', lineHeight: '1.2', textShadow: `0 0 4px ${color}`, wordBreak: 'break-word' }}>
+         <span style={{ fontSize: '0.8rem', fontWeight: 'bold', lineHeight: '1.2', textShadow: `0 0 4px rgba(0,0,0,0.5)`, wordBreak: 'break-word' }}>
              {data.label}
          </span>
          <span style={{ 
-             fontSize: '0.7rem', background: color, color: '#0a0a0c', 
+             fontSize: '0.7rem', background: color, color: '#0f172a', 
              padding: '2px 8px', marginTop: '8px', borderRadius: '2px', fontWeight: 'bold'
          }}>
             {data.subtasksCount ? `${data.subtasksCount}/${data.subtasksCount}` : '0/0'}
@@ -48,7 +49,7 @@ const nodeTypes = {
 };
 
 export default function Home() {
-  // const router = useRouter();
+  const router = useRouter();
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [loading, setLoading] = useState(true);
@@ -79,12 +80,12 @@ export default function Home() {
               id: `e${e.source}-${e.target}-${idx}`,
               source: e.source,
               target: e.target,
-              type: 'smoothstep',
+              type: 'default',
               animated: false,
               style: { 
-                stroke: '#0ea5e9',
-                strokeWidth: 3,
-                filter: 'drop-shadow(0 0 5px rgba(14, 165, 233, 0.6))'
+                stroke: '#047857', // Rich emerald/forest green for natural connections
+                strokeWidth: 2,
+                filter: 'drop-shadow(0 0 2px rgba(4, 120, 87, 0.4))'
               }
           }));
 
@@ -161,7 +162,7 @@ export default function Home() {
   };
 
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#0a0a0c', display: 'flex' }}>
+    <div style={{ width: '100vw', height: '100vh', background: '#171a1f', display: 'flex' }}>
       <div style={{ flex: 1, position: 'relative' }}>
           {loading ? (
               <div className="flex items-center justify-center h-full w-full">
@@ -197,10 +198,11 @@ export default function Home() {
                 zoomOnScroll={true}
                 zoomOnPinch={true}
                 zoomOnDoubleClick={true}
+                minZoom={0.01}
                 fitView
                 proOptions={{ hideAttribution: true }}
               >
-                <Background color="#1f1f22" gap={25} size={2} variant={BackgroundVariant.Dots} />
+                <Background color="#334155" gap={25} size={2} variant={BackgroundVariant.Dots} />
                 <Controls style={{ filter: 'invert(80%) sepia(90%) saturate(400%) hue-rotate(360deg)' }} />
               </ReactFlow>
               </>
@@ -242,6 +244,7 @@ export default function Home() {
                                 transition: 'all 0.2s',
                                 background: '#1e293b'
                             }}
+                            onClick={() => router.push(`/lesson/${lesson.id}`)}
                             onMouseEnter={(e: any) => { e.currentTarget.style.borderColor = '#0ea5e9'; e.currentTarget.style.background = '#273549'; }}
                             onMouseLeave={(e: any) => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.background = '#1e293b'; }}
                             >
