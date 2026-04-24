@@ -85,7 +85,7 @@ async def get_node_lessons(node_id: str):
 @app.get("/api/v1/lessons/{lesson_id}")
 async def get_lesson_details(lesson_id: str):
     """
-    Pulls details for a specific lesson (subtopic), including content_tex.
+    Pulls details for a specific lesson (subtopic), including content_tex and task_groups.
     """
     try:
         conn = get_db_connection()
@@ -94,11 +94,45 @@ async def get_lesson_details(lesson_id: str):
         cur.execute("SELECT id, topic_id, name as title, importance, sort_order, video_url, content_tex FROM public.subtopics WHERE id = %s;", (lesson_id,))
         lesson = cur.fetchone()
         
+        if not lesson:
+            cur.close()
+            conn.close()
+            return {"error": "Lesson not found"}
+            
+        cur.execute("SELECT id, name FROM public.task_groups WHERE subtopic_id = %s ORDER BY created_at ASC;", (lesson_id,))
+        task_groups = cur.fetchall()
+        
+        lesson["task_groups"] = task_groups
+        
         cur.close()
         conn.close()
-        if not lesson:
-            return {"error": "Lesson not found"}
         return {"lesson": lesson}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.get("/api/v1/exercises/{task_group_id}")
+async def get_exercises(task_group_id: str):
+    """
+    Pulls exercises (tasks) for a specific task group.
+    """
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("SELECT name FROM public.task_groups WHERE id = %s;", (task_group_id,))
+        task_group = cur.fetchone()
+        
+        if not task_group:
+            cur.close()
+            conn.close()
+            return {"error": "Task group not found"}
+            
+        cur.execute("SELECT id, content FROM public.tasks WHERE task_group_id = %s ORDER BY created_at ASC;", (task_group_id,))
+        tasks = cur.fetchall()
+        
+        cur.close()
+        conn.close()
+        return {"task_group_name": task_group["name"], "tasks": tasks}
     except Exception as e:
         return {"error": str(e)}
 

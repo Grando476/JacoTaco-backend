@@ -79,6 +79,24 @@ export default function LessonPage({ params }: { params: { id: string } }) {
              )}
           </div>
         </div>
+
+        {lesson.task_groups && lesson.task_groups.length > 0 && (
+          <div className="mt-12 border-t pt-8">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Grupy zadań</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {lesson.task_groups.map((group: any) => (
+                <Link 
+                  key={group.id} 
+                  href={`/exercise/${group.id}`}
+                  className="block p-4 border rounded-lg bg-white shadow-sm hover:shadow-md hover:border-blue-500 transition-all"
+                >
+                  <h3 className="font-semibold text-lg text-blue-600">{group.name}</h3>
+                  <p className="text-gray-500 text-sm mt-1">Przejdź do zadań &rarr;</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
