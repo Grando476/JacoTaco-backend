@@ -57,6 +57,20 @@ export default function Home() {
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [sidebarLessons, setSidebarLessons] = useState<any[]>([]);
   const [loadingLessons, setLoadingLessons] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [rfInstance, setRfInstance] = useState<any>(null);
+
+  const filteredNodes = searchQuery
+    ? nodes.filter(n => (n.data.label as string).toLowerCase().includes(searchQuery.toLowerCase()))
+    : [];
+
+  const onSearchSelect = (node: Node) => {
+    if (rfInstance) {
+      rfInstance.setCenter(node.position.x + 70, node.position.y + 70, { zoom: 1.2, duration: 800 });
+    }
+    onNodeClick({} as React.MouseEvent, node);
+    setSearchQuery("");
+  };
 
   useEffect(() => {
     const fetchNodes = async () => {
@@ -170,6 +184,50 @@ export default function Home() {
               </div>
           ) : (
               <>
+              <div style={{
+                  position: 'absolute', top: 20, left: 20, zIndex: 100,
+                  display: 'flex', flexDirection: 'column', gap: '5px'
+              }}>
+                  <input 
+                      type="text" 
+                      placeholder="Szukaj tematu..." 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      style={{
+                          padding: '10px 15px', width: '300px',
+                          background: '#1a222c', color: '#f8fafc',
+                          border: '1px solid #2d3748', borderRadius: '5px',
+                          outline: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+                      }}
+                  />
+                  {searchQuery && (
+                      <div style={{
+                          background: '#1a222c', border: '1px solid #2d3748',
+                          borderRadius: '5px', maxHeight: '300px', overflowY: 'auto',
+                          boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
+                      }}>
+                          {filteredNodes.length > 0 ? filteredNodes.map(node => (
+                              <div 
+                                  key={node.id} 
+                                  onClick={() => onSearchSelect(node)}
+                                  style={{
+                                      padding: '10px 15px', color: '#cbd5e1',
+                                      cursor: 'pointer', borderBottom: '1px solid #2d3748',
+                                      transition: 'background 0.2s'
+                                  }}
+                                  onMouseEnter={(e: any) => e.currentTarget.style.background = '#273549'}
+                                  onMouseLeave={(e: any) => e.currentTarget.style.background = 'transparent'}
+                              >
+                                  {node.data.label as string}
+                              </div>
+                          )) : (
+                              <div style={{ padding: '10px 15px', color: '#64748b', fontStyle: 'italic' }}>
+                                  Brak wyników
+                              </div>
+                          )}
+                      </div>
+                  )}
+              </div>
               <button 
                   onClick={saveLayout}
                   disabled={savingLayout}
@@ -200,6 +258,7 @@ export default function Home() {
                 zoomOnDoubleClick={true}
                 minZoom={0.01}
                 fitView
+                onInit={setRfInstance}
                 proOptions={{ hideAttribution: true }}
               >
                 <Background color="#334155" gap={25} size={2} variant={BackgroundVariant.Dots} />
