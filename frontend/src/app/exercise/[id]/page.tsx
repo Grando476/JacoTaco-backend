@@ -73,7 +73,7 @@ export default function ExercisePage({ params }: { params: { id: string } }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8 flex justify-center items-center">
+      <div className="min-h-screen bg-[#171a1f] text-[#f8fafc] p-8 flex justify-center items-center">
         <p className="text-xl">Ładowanie zadań...</p>
       </div>
     );
@@ -81,9 +81,9 @@ export default function ExercisePage({ params }: { params: { id: string } }) {
 
   if (error || !taskGroup) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8 flex flex-col justify-center items-center">
+      <div className="min-h-screen bg-[#171a1f] text-[#f8fafc] p-8 flex flex-col justify-center items-center">
         <p className="text-xl text-red-500 mb-4">Błąd: {error || "Nie znaleziono zadań"}</p>
-        <button onClick={() => router.back()} className="text-blue-500 hover:underline">
+        <button onClick={() => router.back()} className="text-[#38bdf8] hover:text-[#0ea5e9] transition-colors">
           &larr; Wróć
         </button>
       </div>
@@ -91,12 +91,12 @@ export default function ExercisePage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md text-black">
-        <button onClick={() => router.back()} className="text-blue-500 hover:underline mb-4 inline-block">
+    <div className="min-h-screen bg-[#171a1f] text-[#f8fafc] p-8">
+      <div className="max-w-3xl mx-auto bg-[#1a222c] border border-[#2d3748] p-8 rounded-lg shadow-xl text-[#f8fafc]">
+        <button onClick={() => router.back()} className="text-[#38bdf8] hover:text-[#0ea5e9] transition-colors mb-6 inline-block">
           &larr; Wróć do Lekcji
         </button>
-        <h1 className="text-3xl font-bold mb-6">{taskGroup.task_group_name}</h1>
+        <h1 className="text-3xl font-bold mb-6 text-[#f8fafc]">{taskGroup.task_group_name}</h1>
 
         {taskGroup.tasks && taskGroup.tasks.length > 0 ? (
           <div className="space-y-8">
@@ -113,12 +113,12 @@ export default function ExercisePage({ params }: { params: { id: string } }) {
               const correctOpt = contentObj.correct_index;
 
               return (
-                <div key={task.id} className="p-6 border rounded-lg bg-gray-50 shadow-sm">
-                  <h3 className="font-semibold text-lg text-gray-800 mb-4">
+                <div key={task.id} className="p-6 border border-[#334155] rounded-lg bg-[#1e293b] shadow-md">
+                  <h3 className="font-semibold text-lg text-[#cbd5e1] mb-4">
                     Zadanie {index + 1}
                   </h3>
                   
-                  <div className="text-lg text-gray-900 mb-6">
+                  <div className="text-lg text-[#f8fafc] mb-6">
                     <MixedMathText text={contentObj.question || ''} />
                   </div>
 
@@ -128,17 +128,17 @@ export default function ExercisePage({ params }: { params: { id: string } }) {
                         let btnClass = "p-4 text-center border rounded-md transition-all text-lg ";
                         if (isChecked) {
                           if (optIndex === correctOpt) {
-                            btnClass += "bg-green-100 border-green-500 text-green-900 font-bold";
+                            btnClass += "bg-[#064e3b] border-[#10b981] text-[#a7f3d0] font-bold shadow-[0_0_10px_rgba(16,185,129,0.3)]";
                           } else if (optIndex === selectedOpt) {
-                            btnClass += "bg-red-100 border-red-500 text-red-900 opacity-80";
+                            btnClass += "bg-[#7f1d1d] border-[#ef4444] text-[#fecaca] opacity-80";
                           } else {
-                            btnClass += "bg-gray-100 border-gray-200 opacity-50";
+                            btnClass += "bg-[#0f172a] border-[#334155] text-[#64748b] opacity-50";
                           }
                         } else {
                           if (selectedOpt === optIndex) {
-                            btnClass += "bg-blue-100 border-blue-500 shadow-md ring-2 ring-blue-300";
+                            btnClass += "bg-[#0c4a6e] border-[#0ea5e9] text-[#bae6fd] shadow-[0_0_10px_rgba(14,165,233,0.3)]";
                           } else {
-                            btnClass += "bg-white hover:bg-blue-50 hover:border-blue-300";
+                            btnClass += "bg-[#1a222c] border-[#334155] text-[#cbd5e1] hover:bg-[#273549] hover:border-[#0ea5e9]";
                           }
                         }
 
@@ -157,29 +157,29 @@ export default function ExercisePage({ params }: { params: { id: string } }) {
                   )}
 
                   {contentObj.options && (
-                    <div className="mt-6 flex flex-col items-start gap-4">
+                    <div className="mt-8 flex flex-col items-start gap-4">
                       <button
                         onClick={() => handleCheck(task.id)}
                         disabled={isChecked || selectedOpt === undefined}
                         className={`px-8 py-3 rounded-md font-bold text-white transition-all ${
                           isChecked || selectedOpt === undefined
-                            ? 'bg-gray-400 cursor-not-allowed opacity-70'
-                            : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'
+                            ? 'bg-[#475569] cursor-not-allowed opacity-50'
+                            : 'bg-[#0ea5e9] hover:bg-[#0284c7] shadow-[0_0_15px_rgba(14,165,233,0.4)] hover:shadow-[0_0_20px_rgba(14,165,233,0.6)]'
                         }`}
                       >
                         {isChecked ? "Sprawdzono" : "Sprawdź odpowiedź"}
                       </button>
 
                       {isChecked && (
-                        <div className={`mt-4 p-5 w-full rounded-md border ${selectedOpt === correctOpt ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                          <p className={`font-bold text-lg mb-2 ${selectedOpt === correctOpt ? 'text-green-700' : 'text-red-700'}`}>
+                        <div className={`mt-4 p-5 w-full rounded-md border ${selectedOpt === correctOpt ? 'bg-[#064e3b]/30 border-[#10b981]' : 'bg-[#7f1d1d]/30 border-[#ef4444]'}`}>
+                          <p className={`font-bold text-lg mb-2 ${selectedOpt === correctOpt ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
                             {selectedOpt === correctOpt ? "✨ Świetnie! Poprawna odpowiedź." : "❌ Niestety, to nie jest poprawna odpowiedź."}
                           </p>
                           
                           {task.exemplary_solution && (
-                            <div className="mt-4 pt-4 border-t border-gray-300 text-gray-800">
-                              <h4 className="font-semibold text-gray-900 mb-3">Wyjaśnienie:</h4>
-                              <div className="text-lg">
+                            <div className="mt-5 pt-5 border-t border-[#334155] text-[#f8fafc]">
+                              <h4 className="font-semibold text-[#38bdf8] mb-3">Wyjaśnienie:</h4>
+                              <div className="text-lg bg-[#0f172a] p-4 rounded-md border border-[#1e293b]">
                                 <MixedMathText text={task.exemplary_solution} />
                               </div>
                             </div>
@@ -193,7 +193,7 @@ export default function ExercisePage({ params }: { params: { id: string } }) {
             })}
           </div>
         ) : (
-          <p className="text-gray-500 italic">Brak zadań w tej grupie.</p>
+          <p className="text-[#94a3b8] italic">Brak zadań w tej grupie.</p>
         )}
       </div>
     </div>

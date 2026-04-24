@@ -258,6 +258,7 @@ export default function Home() {
                 zoomOnDoubleClick={true}
                 minZoom={0.01}
                 fitView
+                fitViewOptions={{ minZoom: 0.3, maxZoom: 1 }}
                 onInit={setRfInstance}
                 proOptions={{ hideAttribution: true }}
               >
