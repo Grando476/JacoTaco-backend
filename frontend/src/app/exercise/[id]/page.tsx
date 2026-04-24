@@ -37,6 +37,9 @@ export default function ExercisePage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
+  const [checkedTasks, setCheckedTasks] = useState<Record<string, boolean>>({});
+
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -58,6 +61,15 @@ export default function ExercisePage({ params }: { params: { id: string } }) {
     };
     fetchTasks();
   }, [params.id]);
+
+  const handleSelect = (taskId: string, optionIndex: number) => {
+    if (checkedTasks[taskId]) return;
+    setSelectedAnswers(prev => ({ ...prev, [taskId]: optionIndex }));
+  };
+
+  const handleCheck = (taskId: string) => {
+    setCheckedTasks(prev => ({ ...prev, [taskId]: true }));
+  };
 
   if (loading) {
     return (
@@ -89,37 +101,91 @@ export default function ExercisePage({ params }: { params: { id: string } }) {
         {taskGroup.tasks && taskGroup.tasks.length > 0 ? (
           <div className="space-y-8">
             {taskGroup.tasks.map((task: any, index: number) => {
-              // Parse the content if it's a JSON string
               let contentObj: any = {};
               try {
                 contentObj = typeof task.content === 'string' ? JSON.parse(task.content) : task.content;
               } catch (e) {
-                // If it's not JSON, fallback to treating it as a raw string
                 contentObj = { question: task.content };
               }
 
+              const isChecked = checkedTasks[task.id];
+              const selectedOpt = selectedAnswers[task.id];
+              const correctOpt = contentObj.correct_index;
+
               return (
-                <div key={task.id} className="p-6 border rounded-lg bg-gray-50">
+                <div key={task.id} className="p-6 border rounded-lg bg-gray-50 shadow-sm">
                   <h3 className="font-semibold text-lg text-gray-800 mb-4">
                     Zadanie {index + 1}
                   </h3>
                   
-                  {/* The Question */}
                   <div className="text-lg text-gray-900 mb-6">
                     <MixedMathText text={contentObj.question || ''} />
                   </div>
 
-                  {/* The Options (if available) */}
                   {contentObj.options && Array.isArray(contentObj.options) && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {contentObj.options.map((opt: string, optIndex: number) => (
-                        <button 
-                          key={optIndex}
-                          className="p-3 text-center border rounded-md bg-white hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                        >
-                          <MixedMathText text={opt} />
-                        </button>
-                      ))}
+                      {contentObj.options.map((opt: string, optIndex: number) => {
+                        let btnClass = "p-4 text-center border rounded-md transition-all text-lg ";
+                        if (isChecked) {
+                          if (optIndex === correctOpt) {
+                            btnClass += "bg-green-100 border-green-500 text-green-900 font-bold";
+                          } else if (optIndex === selectedOpt) {
+                            btnClass += "bg-red-100 border-red-500 text-red-900 opacity-80";
+                          } else {
+                            btnClass += "bg-gray-100 border-gray-200 opacity-50";
+                          }
+                        } else {
+                          if (selectedOpt === optIndex) {
+                            btnClass += "bg-blue-100 border-blue-500 shadow-md ring-2 ring-blue-300";
+                          } else {
+                            btnClass += "bg-white hover:bg-blue-50 hover:border-blue-300";
+                          }
+                        }
+
+                        return (
+                          <button 
+                            key={optIndex}
+                            onClick={() => handleSelect(task.id, optIndex)}
+                            disabled={isChecked}
+                            className={btnClass}
+                          >
+                            <MixedMathText text={opt} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {contentObj.options && (
+                    <div className="mt-6 flex flex-col items-start gap-4">
+                      <button
+                        onClick={() => handleCheck(task.id)}
+                        disabled={isChecked || selectedOpt === undefined}
+                        className={`px-8 py-3 rounded-md font-bold text-white transition-all ${
+                          isChecked || selectedOpt === undefined
+                            ? 'bg-gray-400 cursor-not-allowed opacity-70'
+                            : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'
+                        }`}
+                      >
+                        {isChecked ? "Sprawdzono" : "Sprawdź odpowiedź"}
+                      </button>
+
+                      {isChecked && (
+                        <div className={`mt-4 p-5 w-full rounded-md border ${selectedOpt === correctOpt ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                          <p className={`font-bold text-lg mb-2 ${selectedOpt === correctOpt ? 'text-green-700' : 'text-red-700'}`}>
+                            {selectedOpt === correctOpt ? "✨ Świetnie! Poprawna odpowiedź." : "❌ Niestety, to nie jest poprawna odpowiedź."}
+                          </p>
+                          
+                          {task.exemplary_solution && (
+                            <div className="mt-4 pt-4 border-t border-gray-300 text-gray-800">
+                              <h4 className="font-semibold text-gray-900 mb-3">Wyjaśnienie:</h4>
+                              <div className="text-lg">
+                                <MixedMathText text={task.exemplary_solution} />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
