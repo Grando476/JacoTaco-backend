@@ -15,24 +15,43 @@ supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 llm = ChatGoogleGenerativeAI(
     model="gemini-3.1-flash-lite-preview", 
     google_api_key=os.getenv("GOOGLE_API_KEY"), 
-    temperature=0.7
+    temperature=0.9
 )
 
 @app.route('/api/generate/<tg_id>', methods=['POST'])
 def generate_tasks_api(tg_id):
     counts = request.json 
     res = supabase.table("task_groups").select(
-        "name, subtopics(name, content_tex, topics(name, content_tex, chapters(name)))"
+        "name, subtopics(id, name, content_tex, topics(name, content_tex, chapters(name)))"
     ).eq("id", tg_id).single().execute()
     
     d = res.data
+    subtopic_id = d['subtopics']['id']
+    
+    try:
+        pk_res = supabase.rpc("get_prior_knowledge", {"p_subtopic_id": subtopic_id}).execute()
+        prior_knowledge = pk_res.data or {}
+    except Exception as e:
+        print(f"Warning: Failed to fetch prior knowledge: {e}")
+        prior_knowledge = {}
+
+    known_topics_names = prior_knowledge.get("known_topics_names") or []
+    known_subtopics_data = prior_knowledge.get("known_subtopics") or []
+    
+    # Format subtopics theories
+    known_subtopics_theories = []
+    for st in known_subtopics_data:
+        known_subtopics_theories.append(f"{st.get('name')}: {st.get('content_tex', '')}")
+
     context = {
         "chapter": d['subtopics']['topics']['chapters']['name'],
         "topic": d['subtopics']['topics']['name'],
         "subtopic": d['subtopics']['name'],
         "group": d['name'],
         "topic_theory": d['subtopics']['topics'].get('content_tex', '') or "Brak",
-        "subtopic_theory": d['subtopics'].get('content_tex', '') or "Brak"
+        "subtopic_theory": d['subtopics'].get('content_tex', '') or "Brak",
+        "known_topics_names": ", ".join(known_topics_names) if known_topics_names else "Brak",
+        "known_subtopics_theories": " | ".join(known_subtopics_theories) if known_subtopics_theories else "Brak"
     }
 
     # Zwraca dane kawałek po kawałku

@@ -1,15 +1,23 @@
 from langchain_core.prompts import ChatPromptTemplate
 
 GENERATOR_PROMPT = ChatPromptTemplate.from_template("""
-Jesteś wybitnym dydaktykiem matematyki. Wygeneruj dokładnie {count} zadań wielokrotnego wyboru (MCQ) o poziomie trudności: {difficulty}.
+Jesteś wybitnym dydaktykiem matematyki. Tworzysz zadania TYLKO i WYŁĄCZNIE na poziomie podstawowym dla szkoły średniej (liceum/technikum) w Polsce (podstawa programowa do matury). Wygeneruj dokładnie {count} zadań wielokrotnego wyboru (MCQ) o poziomie trudności: {difficulty}.
 
-KONTEKST:
+KONTEKST ZADANIA (GŁÓWNY CEL):
 Ścieżka: {chapter} > {topic} > {subtopic} > {group}
-Teoria: {topic_theory}, {subtopic_theory}
+Teoria bieżąca: {topic_theory}, {subtopic_theory}
 
-ZASADY:
-1. Matematyka: Każda liczba, zmienna i wzór MUSZĄ być w LaTeX ($...$ w tekście, $$...$$ w nowej linii). Dotyczy to też wariantów odpowiedzi.
-2. Opcje: Dokładnie 4 opcje (0, 1, 2, 3). Tylko JEDNA w 100% poprawna. pozostałe niepoprawne odpowiedzi oparte na typowych błędach.
+WIEDZA UPRZEDNIA UCZNIA (MOŻESZ Z NIEJ KORZYSTAĆ DO UTRUDNIANIA ZADAŃ):
+Poprzednie tematy ucznia: {known_topics_names}
+Poprzednie podtematy z tego działu: {known_subtopics_theories}
+
+KRYTYCZNE ZASADY PEDAGOGICZNE I OGRANICZENIA MATERIAŁU:
+1. Poziom trudności i podstawa: Wszystkie zadania muszą być w 100% zgodne z podstawą programową do matury podstawowej z matematyki w Polsce. Absolutnie nie używaj zagadnień rozszerzonych ani akademickich.
+2. Ograniczenie wiedzy (STRICT): Masz BEZWZGLĘDNY ZAKAZ używania operacji, funkcji, pojęć i symboli, które nie zostały wprost wymienione w "Kontekście zadania" lub w "Wiedzy uprzedniej ucznia". 
+   - Jeżeli uczeń jest przy wczesnym temacie (np. "Zbiory"), NIGDY nie wprowadzaj pojęć późniejszych takich jak: funkcja kwadratowa, trygonometria, logarytmy, ciągi, prawdopodobieństwo, wielomiany wyższych rzędów itp.
+   - Utrudnianie zadania (Hard/Very Hard) ma polegać na łączeniu TYLKO JUŻ ZNANYCH pojęć (np. tworzenie bardziej złożonych wyrażeń z tym co uczeń już zna, zagnieżdżanie znanych działań, wymagające dłuższego liczenia lub sprytu), a absolutnie NIE na dodawaniu materiału z przyszłości.
+3. Matematyka: Każda liczba, zmienna i wzór MUSZĄ być w LaTeX ($...$ w tekście, $$...$$ w nowej linii). Dotyczy to też wariantów odpowiedzi.
+4. Opcje: Dokładnie 4 opcje (0, 1, 2, 3). Tylko JEDNA w 100% poprawna. pozostałe niepoprawne odpowiedzi oparte na typowych błędach.
 
 Zwróć TYLKO czysty JSON (lista obiektów):
 [

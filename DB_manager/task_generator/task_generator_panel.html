@@ -19,7 +19,7 @@
         .btn-delete { background: #e74c3c; padding: 5px 10px; }
         
         .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .task-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%; max-width: 800px; position: relative; border-left: 5px solid #3498db; }
+        .task-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%; max-width: 1400px; position: relative; border-left: 5px solid #3498db; }
         .task-card.Easy { border-left-color: #2ecc71; }
         .task-card.Medium { border-left-color: #f1c40f; }
         .task-card.Hard { border-left-color: #e67e22; }
@@ -32,9 +32,14 @@
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
         .card-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .latex-preview { background: #fdfdfd; border: 1px dashed #bdc3c7; padding: 10px; margin-top: 5px; min-height: 20px; font-size: 14px; }
+        .latex-preview { font-size: 15px; line-height: 1.5; }
+        
+        .split-view { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .edit-side { display: flex; flex-direction: column; }
+        .preview-side { background: #fafafa; border: 1px solid #e0e0e0; padding: 15px; border-radius: 6px; }
         
         #loading { display: none; font-size: 18px; font-weight: bold; color: #8e44ad; }
+        
     </style>
 </head>
 <body>
@@ -157,31 +162,47 @@
                     <button class="btn btn-delete" onclick="removeTask(${index})">X Usuń</button>
                 </div>
                 
-                <div class="form-group">
-                    <label>Pytanie (LaTeX):</label>
-                    <textarea id="q-${index}" oninput="updatePreview('q-${index}', 'prev-q-${index}')">${task.content.question}</textarea>
-                    <div id="prev-q-${index}" class="latex-preview"></div>
-                </div>
-
-                <div class="options-grid">
-                    ${task.content.options.map((opt, i) => `
+                <div class="split-view">
+                    <div class="edit-side">
                         <div class="form-group">
-                            <label>Opcja ${['A','B','C','D'][i]}: ${i === task.content.correct_index ? '(POPRAWNA ✅)' : ''}</label>
-                            <input type="text" id="opt-${index}-${i}" value="${opt}" oninput="updatePreview('opt-${index}-${i}', 'prev-opt-${index}-${i}')">
-                            <div id="prev-opt-${index}-${i}" class="latex-preview"></div>
+                            <label>Pytanie (LaTeX):</label>
+                            <textarea id="q-${index}" oninput="updatePreview('q-${index}', 'prev-q-${index}')">${task.content.question}</textarea>
                         </div>
-                    `).join('')}
-                </div>
-                
-                <div class="form-group">
-                    <label>Index poprawnej odp. (0=A, 1=B, 2=C, 3=D):</label>
-                    <input type="number" id="corr-${index}" value="${task.content.correct_index}" min="0" max="3">
-                </div>
 
-                <div class="form-group">
-                    <label>Rozwiązanie:</label>
-                    <textarea id="sol-${index}" oninput="updatePreview('sol-${index}', 'prev-sol-${index}')">${task.exemplary_solution || ''}</textarea>
-                    <div id="prev-sol-${index}" class="latex-preview"></div>
+                        <div class="options-grid">
+                            ${task.content.options.map((opt, i) => `
+                                <div class="form-group">
+                                    <label>Opcja ${['A','B','C','D'][i]}: ${i === task.content.correct_index ? '(POPRAWNA ✅)' : ''}</label>
+                                    <input type="text" id="opt-${index}-${i}" value="${opt}" oninput="updatePreview('opt-${index}-${i}', 'prev-opt-${index}-${i}')">
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Index poprawnej odp. (0=A, 1=B, 2=C, 3=D):</label>
+                            <input type="number" id="corr-${index}" value="${task.content.correct_index}" min="0" max="3">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Rozwiązanie:</label>
+                            <textarea id="sol-${index}" oninput="updatePreview('sol-${index}', 'prev-sol-${index}')">${task.exemplary_solution || ''}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="preview-side">
+                        <div style="font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Podgląd Zadania</div>
+                        <div id="prev-q-${index}" class="latex-preview" style="margin-bottom: 15px;"></div>
+                        <ul style="list-style-type: none; padding-left: 0; margin-top: 0;">
+                            ${task.content.options.map((opt, i) => `
+                                <li style="margin-bottom: 8px; display: flex; gap: 10px;">
+                                    <strong style="min-width: 20px;">${['A','B','C','D'][i]})</strong>
+                                    <div id="prev-opt-${index}-${i}" class="latex-preview" style="display: inline-block;"></div>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div style="font-weight: bold; margin-top: 20px; font-size: 13px; color: #555; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Podgląd Rozwiązania:</div>
+                        <div id="prev-sol-${index}" class="latex-preview" style="margin-top: 10px;"></div>
+                    </div>
                 </div>
             </div>
         `;
@@ -199,55 +220,7 @@
         container.innerHTML = '';
 
         generatedTasks.forEach((task, index) => {
-            const safeClass = task.difficulty_level.replace(' ', '.');
-            
-            // Sprawdzamy status walidacji dla ramki
-            const validationStyle = task.validation?.is_perfect ? 'border: 3px solid #2ecc71;' : 'border: 3px solid #e74c3c;';
-            const feedbackStr = task.validation?.is_perfect ? '✅ Valid' : `❌ ${task.validation?.feedback || 'Błąd'}`;
-
-            const html = `
-                <div class="task-card ${safeClass}" id="task-${index}" style="${validationStyle}">
-                    <div class="card-header">
-                        <span>Zadanie ${index + 1} - ${task.difficulty_level} (${feedbackStr})</span>
-                        <button class="btn btn-delete" onclick="removeTask(${index})">X Usuń</button>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Pytanie (LaTeX):</label>
-                        <textarea id="q-${index}" oninput="updatePreview('q-${index}', 'prev-q-${index}')">${task.content.question}</textarea>
-                        <div id="prev-q-${index}" class="latex-preview"></div>
-                    </div>
-
-                    <div class="options-grid">
-                        ${task.content.options.map((opt, i) => `
-                            <div class="form-group">
-                                <label>Opcja ${['A','B','C','D'][i]}: ${i === task.content.correct_index ? '(POPRAWNA ✅)' : ''}</label>
-                                <input type="text" id="opt-${index}-${i}" value="${opt}" oninput="updatePreview('opt-${index}-${i}', 'prev-opt-${index}-${i}')">
-                                <div id="prev-opt-${index}-${i}" class="latex-preview"></div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Index poprawnej odp. (0=A, 1=B, 2=C, 3=D):</label>
-                        <input type="number" id="corr-${index}" value="${task.content.correct_index}" min="0" max="3">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Rozwiązanie:</label>
-                        <textarea id="sol-${index}" oninput="updatePreview('sol-${index}', 'prev-sol-${index}')">${task.exemplary_solution || ''}</textarea>
-                        <div id="prev-sol-${index}" class="latex-preview"></div>
-                    </div>
-                </div>
-            `;
-            container.innerHTML += html;
-            
-            // Render podglądu dla każdego zadania po przerysowaniu listy
-            setTimeout(() => {
-                updatePreview(`q-${index}`, `prev-q-${index}`);
-                [0,1,2,3].forEach(i => updatePreview(`opt-${index}-${i}`, `prev-opt-${index}-${i}`));
-                updatePreview(`sol-${index}`, `prev-sol-${index}`);
-            }, 50);
+            renderSingleTask(task, index);
         });
     }
 

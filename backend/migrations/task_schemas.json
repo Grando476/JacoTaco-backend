@@ -1,6 +1,6 @@
 {
   "task_type": "MCQ",
-  "description": "Pytania zamkniętet jednokrotnego wyboru",
+  "description": "Pytania zamknięte jednokrotnego wyboru",
   "content_schema": {
     "question": "Here is task content",
     "question_image_url": null, 
@@ -10,7 +10,6 @@
       { "id": "C", "text": "x = 3", "image_url": null },
       { "id": "D", "text": "x = 4", "image_url": null }
     ],
-    "correct_option_id": "B",
-    "exemplaray_solution": "2x = 4 | :2 /n x = 2"
+    "correct_option_id": "B"
   }
 }

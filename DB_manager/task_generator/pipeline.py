@@ -12,7 +12,6 @@ def invoke_with_retry(chain, params, max_retries=5, delay=10):
             time.sleep(delay)
     return None
 
-# Zmień tylko funkcję run_generation_pipeline, reszta zostaje:
 def run_generation_pipeline(llm, context, counts):
     parser = JsonOutputParser()
 
