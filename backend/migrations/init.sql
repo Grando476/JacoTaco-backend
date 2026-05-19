@@ -97,6 +97,7 @@ DECLARE
     v_sort_order INTEGER;
     v_known_topics JSON;
     v_known_subtopics JSON;
+    v_unknown_topics JSON;
 BEGIN
     -- Pobierz topic_id i sort_order dla podanego podtematu
     SELECT topic_id, sort_order INTO v_topic_id, v_sort_order
@@ -117,6 +118,20 @@ BEGIN
     FROM public.topics t
     JOIN ancestors a ON t.id = a.parent_id;
 
+    -- Pobierz nazwy tematów, których uczeń jeszcze nie zna (reszta grafu)
+    WITH RECURSIVE ancestors AS (
+        SELECT parent_id
+        FROM public.topic_edges
+        WHERE child_id = v_topic_id
+        UNION
+        SELECT e.parent_id
+        FROM public.topic_edges e
+        INNER JOIN ancestors a ON a.parent_id = e.child_id
+    )
+    SELECT COALESCE(json_agg(t.name), '[]'::json) INTO v_unknown_topics
+    FROM public.topics t
+    WHERE t.id != v_topic_id AND t.id NOT IN (SELECT parent_id FROM ancestors);
+
     -- Pobierz wcześniejsze podtematy w ramach tego samego tematu
     SELECT COALESCE(json_agg(
         json_build_object(
@@ -130,7 +145,8 @@ BEGIN
     -- Zwróć wynik jako JSON
     RETURN json_build_object(
         'known_topics_names', v_known_topics,
-        'known_subtopics', v_known_subtopics
+        'known_subtopics', v_known_subtopics,
+        'unknown_topics_names', v_unknown_topics
     );
 END;
 $$;
