@@ -2,6 +2,7 @@ import json
 import time
 from langchain_core.output_parsers import JsonOutputParser
 from prompts import GENERATOR_PROMPT, SOLVER_PROMPT, FINAL_VALIDATOR_PROMPT
+from inspirations import get_generation_params
 
 def invoke_with_retry(chain, params, max_retries=5, delay=10):
     for attempt in range(max_retries):
@@ -22,8 +23,9 @@ def run_generation_pipeline(llm, context, counts):
         batches = [5] * (total_count // 5) + ([total_count % 5] if total_count % 5 != 0 else [])
         
         for batch_count in batches:
+            gen_params = get_generation_params()
             gen_chain = GENERATOR_PROMPT | llm | parser
-            batch = invoke_with_retry(gen_chain, {"count": batch_count, "difficulty": diff, **context})
+            batch = invoke_with_retry(gen_chain, {"count": batch_count, "difficulty": diff, **gen_params, **context})
             if not batch: continue
             if isinstance(batch, dict): batch = [batch]
 

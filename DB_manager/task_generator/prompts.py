@@ -19,6 +19,12 @@ KRYTYCZNE ZASADY PEDAGOGICZNE I OGRANICZENIA MATERIAŁU:
 3. Matematyka: Każda liczba, zmienna i wzór MUSZĄ być w LaTeX ($...$ w tekście, $$...$$ w nowej linii). Dotyczy to też wariantów odpowiedzi.
 4. Opcje: Dokładnie 4 opcje (0, 1, 2, 3). Tylko JEDNA w 100% poprawna. pozostałe niepoprawne odpowiedzi oparte na typowych błędach.
 
+WYTYCZNA ABSOLUTNEJ RÓŻNORODNOŚCI (ZIARNO GENERACJI):
+Unikalny identyfikator paczki (SEED): {random_seed}
+Aby uniknąć powtarzalności zadań, w tej konkretnej generacji nałóż na zadania następującą formę lub pułapkę (zastosuj to kategorycznie):
+> "{inspiration}"
+> Zbuduj wszystkie zadania wokół tej logiki, ale nie pisz o niej wprost w treści zadania.
+
 Zwróć TYLKO czysty JSON (lista obiektów):
 [
   {{
