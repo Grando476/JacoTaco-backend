@@ -13,7 +13,7 @@ CORS(app)
 
 supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 llm = ChatGoogleGenerativeAI(
-    model="gemini-3.1-flash-lite-preview", 
+    model="gemini-3.1-flash-lite", 
     google_api_key=os.getenv("GOOGLE_API_KEY"), 
     temperature=0.9
 )

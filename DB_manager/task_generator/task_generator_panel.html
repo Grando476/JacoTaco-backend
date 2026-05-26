@@ -220,14 +220,36 @@
         container.innerHTML = '';
 
         generatedTasks.forEach((task, index) => {
-            renderSingleTask(task, index);
+            if (task !== null) {
+                renderSingleTask(task, index);
+            }
         });
     }
 
+    function syncDOMToGeneratedTasks() {
+        for (let i = 0; i < generatedTasks.length; i++) {
+            if (generatedTasks[i] === null) continue;
+            const qEl = document.getElementById(`q-${i}`);
+            if (qEl) {
+                generatedTasks[i].content.question = qEl.value;
+                generatedTasks[i].content.options[0] = document.getElementById(`opt-${i}-0`).value;
+                generatedTasks[i].content.options[1] = document.getElementById(`opt-${i}-1`).value;
+                generatedTasks[i].content.options[2] = document.getElementById(`opt-${i}-2`).value;
+                generatedTasks[i].content.options[3] = document.getElementById(`opt-${i}-3`).value;
+                generatedTasks[i].content.correct_index = parseInt(document.getElementById(`corr-${i}`).value);
+                generatedTasks[i].exemplary_solution = document.getElementById(`sol-${i}`).value;
+            }
+        }
+    }
+
     function removeTask(index) {
-        generatedTasks.splice(index, 1);
-        renderTasks();
-        if (generatedTasks.length === 0) document.getElementById('save-btn').style.display = 'none';
+        generatedTasks[index] = null;
+        
+        const taskEl = document.getElementById(`task-${index}`);
+        if (taskEl) taskEl.remove();
+
+        const activeCount = generatedTasks.filter(t => t !== null).length;
+        if (activeCount === 0) document.getElementById('save-btn').style.display = 'none';
     }
 
     function updatePreview(inputId, previewId) {
@@ -239,11 +261,14 @@
 
     async function saveAllToDB() {
         const tgId = document.getElementById('tg-select').value;
-        if (!confirm(`Zapiszesz ${generatedTasks.length} zadań do bazy. Kontynuować?`)) return;
+        const activeTasksCount = generatedTasks.filter(t => t !== null).length;
+        if (!confirm(`Zapiszesz ${activeTasksCount} zadań do bazy. Kontynuować?`)) return;
 
         let successCount = 0;
         
         for (let i = 0; i < generatedTasks.length; i++) {
+            if (generatedTasks[i] === null) continue;
+
             const q = document.getElementById(`q-${i}`).value;
             const opts = [
                 document.getElementById(`opt-${i}-0`).value,
@@ -271,7 +296,7 @@
             if (res.ok) successCount++;
         }
 
-        alert(`Zapisano ${successCount} z ${generatedTasks.length} zadań!`);
+        alert(`Zapisano ${successCount} z ${activeTasksCount} zadań!`);
         generatedTasks = [];
         renderTasks();
         document.getElementById('save-btn').style.display = 'none';
