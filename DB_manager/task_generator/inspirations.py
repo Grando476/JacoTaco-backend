@@ -8,7 +8,7 @@ INSPIRATIONS_LIST = [
     "Opakuj suchy matematyczny problem w bardzo krótkie zadanie tekstowe. Ukryj matematykę za realistyczną sytuacją (np. prędkość, zakupy, podział przedmiotów, geometria w przestrzeni).",
     "Użyj w zadaniu parametru literowego (np. k, m, p) w miejsce jednej ze standardowych liczb i zapytaj, dla jakiej wartości tego parametru warunek jest spełniony.",
     "Skup się na zidentyfikowaniu typowego błędu ucznia w obecnym temacie (np. ignorowanie zmiany znaku, fałszywa liniowość). Zbuduj bardzo podchwytliwy dystraktor bazujący dokładnie na tym błędzie.",
-    "Dodaj do treści zadania jedną, całkowicie zbędną informację liczbową, która sprawdzi, czy uczeń potrafi logicznie selekcjonować potrzebne mu dane.",
+    "Wpleć w treść zadania dodatkową informację matematyczną, która jest całkowicie zbędna do rozwiązania problemu (tzw. szum informacyjny). Informacja ta musi brzmieć naturalnie i ściśle wiązać się z matematycznym kontekstem (np. podanie trzeciego zbioru, który nie bierze udziału w operacji, lub dodatkowej, niepotrzebnej miary kąta). Absolutnie unikaj dodawania absurdalnych, niezwiązanych z tematem zdań tekstowych.",
     "Wymuś rozwiązanie wieloetapowe: poprawna odpowiedź musi spełniać DWA narzucone z góry warunki jednocześnie (np. być mniejsza od X oraz spełniać główną własność tematu).",
     "Wymuś ewaluację wszystkich opcji poprzez polecenie typu: 'Wskaż opcję, dla której wartość/wynik jest NAJWIĘKSZA/NAJMNIEJSZA'.",
     "Oprzyj zadanie na skrajnym przypadku lub wyjątku w danym temacie (np. zbiór pusty, ułamek niezdefiniowany, brak rozwiązań, tożsamość).",
