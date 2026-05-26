@@ -608,13 +608,13 @@
                                     headers: { 'Content-Type': 'application/json' }, 
                                     body: JSON.stringify({ 
                                         task_group_id: tgId, 
-                                        task_type: task.task_type || 'MCQ', 
-                                        content: task.content, 
-                                        difficulty_level: task.difficulty_level || 'Easy', 
+                                        task_type: task.task_type || 'MCQ',
+                                        content: task.content,
+                                        difficulty_level: task.difficulty_level || 'Easy',
                                         video_url: task.video_url ,
-                                        exemplary_solution: task.exemplary_solution
-                                    }) 
-                                });
+                                        exemplary_solution: task.exemplary_solution,
+                                        human_validated: false
+                                        })                                });
                                 if (!taskRes.ok) throw new Error("Failed creating task");
                             }
                         }

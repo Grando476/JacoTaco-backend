@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS public.tasks (
     difficulty_level task_difficulty DEFAULT 'Easy' NOT NULL,
     exemplary_solution TEXT,
     video_url TEXT,
+    human_validated BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
