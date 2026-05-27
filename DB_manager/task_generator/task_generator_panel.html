@@ -213,7 +213,7 @@
                 </div>
             </div>
         `;
-        container.innerHTML += html;
+        container.insertAdjacentHTML('beforeend', html);
         
         setTimeout(() => {
             updatePreview(`q-${index}`, `prev-q-${index}`);

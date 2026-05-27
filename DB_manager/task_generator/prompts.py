@@ -109,7 +109,8 @@ ZADANIE DO OCENY:
 
 KRYTERIA:
 1. MATEMATYKA: Czy wskazany "correct_index" na pewno pasuje do rozwiązania "exemplary_solution" i pytania "question"? Zrób rygorystyczny przegląd rachunków.
-2. FORMAT: Czy WSZYSTKIE liczby i zmienne są w znacznikach $...$ lub $$...$$? Czy bloki równań i układów są poprawne?
+2. ROZWIĄZANIE: Czy zadanie posiada "exemplary_solution" i nie jest to wartość pusta? (Brak rozwiązania oznacza natychmiastowy brak walidacji).
+3. FORMAT: Czy WSZYSTKIE liczby i zmienne są w znacznikach $...$ lub $$...$$? Czy bloki równań i układów są poprawne?
 
 Zwróć TYLKO czysty JSON. BARDZO WAŻNE: Pamiętaj o ucieczkowaniu ukośników w polu "reasoning" zgodnie ze standardem JSON (np. komendy zapisuj jako "\\\\alpha", "\\\\frac", a nową linię w LaTeX jako "\\\\\\\\"), aby nie zepsuć struktury pliku:
 {{
